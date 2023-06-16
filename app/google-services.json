@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "43625263520",
+    "project_id": "petsall",
+    "storage_bucket": "petsall.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43625263520:android:55b441cac76676184174c5",
+        "android_client_info": {
+          "package_name": "com.example.petsall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "43625263520-34d3sagf5s584u1fjp4djgqajt09t2dm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.petsall",
+            "certificate_hash": "1d26bfcda69efcc282e5c272761977b35a91aebf"
+          }
+        },
+        {
+          "client_id": "43625263520-cdqggc3ss3gvvqqqisojnpjrdjngbrau.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs3Rnu3xpOWiCtihLiK3W31DkGj191hFY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "43625263520-cdqggc3ss3gvvqqqisojnpjrdjngbrau.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
