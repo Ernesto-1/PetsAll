@@ -1,5 +1,7 @@
 package com.example.petsall.di
 
+import com.example.petsall.domain.changepets.PAChangePetsRepo
+import com.example.petsall.domain.changepets.PAChangePetsRepoImpl
 import com.example.petsall.domain.home.PAHomeRepo
 import com.example.petsall.domain.home.PAHomeRepoImpl
 import com.example.petsall.domain.loggin.PALogginRepo
@@ -33,6 +35,8 @@ abstract class AppModule {
     abstract fun providesVetRepository(repoVet: PAVetRepoImpl): PAVetRepo
     @Binds
     abstract fun providesNewPetsRepository(repoNewPets: PANewPetsRepoImpl): PANewPetsRepo
+    @Binds
+    abstract fun providesChangePetsRepository(repoChangePets: PAChangePetsRepoImpl): PAChangePetsRepo
 
     companion object {
         @Provides

@@ -6,5 +6,5 @@ import com.google.firebase.firestore.QuerySnapshot
 
 interface PAHomeRepo {
     suspend fun getDataUser(): DocumentSnapshot?
-    suspend fun getDataPets(): QuerySnapshot?
+    suspend fun getDataPets(): List<DocumentSnapshot?>
 }

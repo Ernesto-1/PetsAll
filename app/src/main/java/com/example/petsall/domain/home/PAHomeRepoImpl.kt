@@ -7,5 +7,5 @@ import javax.inject.Inject
 
 class PAHomeRepoImpl @Inject constructor(private val datasource: PAHomeDatasource): PAHomeRepo {
     override suspend fun getDataUser(): DocumentSnapshot? = datasource.getDataUser()
-    override suspend fun getDataPets(): QuerySnapshot? = datasource.getDataPets()
+    override suspend fun getDataPets(): List<DocumentSnapshot?> = datasource.getDataPets()
 }

@@ -19,8 +19,6 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
 
     init {
         onEvent(PAHomeEvent.GetDataUser(""))
-        onEvent(PAHomeEvent.GetDataPets(""))
-
     }
 
     fun onEvent(event: PAHomeEvent) {
@@ -45,11 +43,10 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                //if (result.data.documents.)
-                                state = if (event.pet.isNotEmpty()){
-                                    state.copy(dataPets = result.data?.documents?.filter { it.id == event.pet })
+                                state = if (event.pet?.isNotEmpty() == true){
+                                    state.copy(dataPets = result.data.filter { it?.id == event.pet })
                                 }else{
-                                    state.copy(dataPets = result.data?.documents)
+                                    state.copy(dataPets = result.data)
                                 }
                             }
                             else -> {}

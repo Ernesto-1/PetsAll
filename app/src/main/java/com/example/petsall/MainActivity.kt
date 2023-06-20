@@ -19,10 +19,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.login.PALogin
@@ -46,23 +49,33 @@ class MainActivity : ComponentActivity() {
                 val navigationController = rememberNavController()
                 val user = Firebase.auth.currentUser
                 val items = listOf(
-                    Menu(Route.PAHome,Icons.Filled.Home,"Inicio"),
-                    Menu(Route.PAVet,Icons.Filled.Favorite,"Veterinario"),
-                    Menu(Route.PAPerfil,Icons.Filled.Person,"Perfil")
-                    )
+                    Menu(Route.PAHome, Icons.Filled.Home, "Inicio"),
+                    Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
+                    Menu(Route.PAPerfil, Icons.Filled.Person, "Perfil")
+                )
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Scaffold( modifier = Modifier.fillMaxSize(), bottomBar = {
+                    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
                         val navBackStackEntry by navigationController.currentBackStackEntryAsState()
                         val currentDestination = navBackStackEntry?.destination
-                        if (currentDestination?.route in listOf(Route.PAHome, Route.PAVet,Route.PAPerfil)) {
+                        if (currentDestination?.route in listOf(
+                                Route.PAHome,
+                                Route.PAVet,
+                                Route.PAPerfil
+                            )
+                        ) {
                             BottomNavigation {
-                                items.forEach {item ->
-                                    BottomNavigationItem(modifier = Modifier.background(Color(0xff84B1B8)),
+                                items.forEach { item ->
+                                    BottomNavigationItem(modifier = Modifier.background(
+                                        Color(
+                                            0xff84B1B8
+                                        )
+                                    ),
                                         icon = {
-                                            Icon(item.icon,
+                                            Icon(
+                                                item.icon,
                                                 contentDescription = null
                                             )
                                         },
@@ -84,19 +97,40 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }) { innerPadding ->
-                        NavHost(navController = navigationController, startDestination = if(user != null) Route.PAHome else Route.PALogin, Modifier.padding(innerPadding)) {
+                        NavHost(
+                            navController = navigationController,
+                            startDestination = if (user != null) Route.PAHome else Route.PALogin,
+                            Modifier.padding(innerPadding)
+                        ) {
                             composable(Route.PALogin) { PALogin(navController = navigationController) }
-                            composable(Route.PAHome){ PAHome(navController = navigationController, activity = this@MainActivity) }
-                            composable(Route.PASignUp){ PASignUp(navController = navigationController) }
-                            composable(Route.PAVet){ PAVet(navController = navigationController) }
-                            composable(Route.PANewPet){ PANewPet(navController = navigationController) }
-                            composable(Route.PAPerfil){ PAPerfil(navController = navigationController) }
-
+                            composable(Route.PAHome) {
+                                PAHome(
+                                    navController = navigationController,
+                                    activity = this@MainActivity
+                                )
+                            }
+                            composable(Route.PASignUp) { PASignUp(navController = navigationController) }
+                            composable(Route.PAVet) { PAVet(navController = navigationController) }
+                            composable(Route.PANewPet) { PANewPet(navController = navigationController) }
+                            composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
+                            composable(
+                                "${Route.PAChangePet}/{petId}",
+                                arguments = listOf(navArgument("petId") {
+                                    type = NavType.StringType
+                                })
+                            ) { backStackEntry ->
+                                backStackEntry.arguments?.getString("petId")
+                                    ?.let {
+                                        PAChangePet(
+                                            idPet = it,
+                                            navController = navigationController,
+                                        )
+                                    }
+                            }
 
 
                         }
                     }
-
 
 
                 }
