@@ -2,10 +2,8 @@ package com.example.petsall.ui.changepet
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,6 +23,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -33,9 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.petsall.R
 import com.example.petsall.presentation.changepets.PAChangePetsViewModel
+import com.example.petsall.presentation.newpets.PANewPetsEven
+import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
+import com.example.petsall.ui.theme.BtnGreen2
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -50,7 +54,9 @@ fun PAChangePet(idPet: String = "",navController: NavController, viewModel: PACh
             TopAppBar(
 
                 title = {
-                    Text(text = "Mis mascotas", color = Color.White, modifier = Modifier.fillMaxWidth().padding(end = 10.dp), textAlign = TextAlign.End)
+                    Text(text = "Mis mascotas", color = Color.White, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 10.dp), textAlign = TextAlign.End)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
@@ -65,7 +71,7 @@ fun PAChangePet(idPet: String = "",navController: NavController, viewModel: PACh
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xffF9F9F9)).padding(top = 45.dp), horizontalAlignment = Alignment.CenterHorizontally
+                        .background(Color(0xffF9F9F9)), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     LazyVerticalGrid(
@@ -78,32 +84,21 @@ fun PAChangePet(idPet: String = "",navController: NavController, viewModel: PACh
                             CardChangePet(data = item?.data, "", isSelected = selectedImage == item?.id.toString()
                                 ,onClick = { selectedImage =  item?.id.toString()})
                         }
+
                     }
-                    ClickableText(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    textDecoration = TextDecoration.None,
-                                    fontSize = 15.sp,
-                                    color = Color(0xffDEC7F5)
-                                )
-                            ) {
-                                append("Cambiar")
-                            }
-                        },
-                        onClick = {
-                            if (selectedImage.isNotEmpty()){
-                                navController.previousBackStackEntry?.savedStateHandle?.set(
-                                    "idPet",
-                                    selectedImage
-                                )
-                                navController.navigateUp()
-                            }
-                        }, modifier = Modifier.padding(vertical = 50.dp)
-                    )
-                    /*if (selectedImage.isEmpty()){
-                        //Tex
-                    }*/
+
+                    ButtonDefault(
+                        textButton = "Cambiar", modifier = Modifier.padding(horizontal = 40.dp)
+                    ) {
+                        if (selectedImage.isNotEmpty()){
+                            navController.previousBackStackEntry?.savedStateHandle?.set(
+                                "idPet",
+                                selectedImage
+                            )
+                            navController.navigateUp()
+                        }
+                    }
+
                 }
             }
         }
@@ -135,21 +130,26 @@ fun CardChangePet(data: Map<String, Any>? = mapOf(), id: String = "" ,isSelected
                 elevation = if (isSelected) 4.dp else 0.dp, shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        painter = painterResource(id = R.drawable.fish),
-                        contentDescription = "",
-                        modifier = Modifier
-                            .height(95.dp)
-                            .fillMaxWidth(),
-                        contentScale = ContentScale.Fit
-                    )
-                    Spacer(
-                        modifier = Modifier
-                            .border(0.5.dp, Color(0xff000000).copy(alpha = 0.8f), shape = RoundedCornerShape(12.dp))
-                            .fillMaxWidth()
-                            .height(1.dp)
-                    )
-                    Text(text = data["Nombre"].toString(), fontSize = 15.sp)
+                    if (data["ImgUrl"].toString() != ""){
+                        AsyncImage(
+                            model = data["ImgUrl"].toString(),
+                            contentDescription = "imageFromUrl",
+                            modifier = Modifier
+                                .height(100.dp)
+                                .fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }else{
+                        Image(
+                            painter = painterResource(id = R.drawable.fish),
+                            contentDescription = "ImageLocal",
+                            modifier = Modifier
+                                .height(100.dp)
+                                .fillMaxWidth(),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                    Text(text = data["Nombre"].toString(), fontSize = 15.sp, modifier = Modifier.padding(vertical = 6.dp), fontWeight = FontWeight.Medium)
                 }
             }
             Text(text = if (isSelected) "Seleccionado" else "", color = borderColor, fontSize = 12.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)

@@ -3,6 +3,7 @@ package com.example.petsall.ui.vet
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.petsall.presentation.vet.PAVetEvent
 import com.example.petsall.presentation.vet.PAVetViewModel
+import com.example.petsall.ui.navigation.Route
 
 @Composable
 fun PAVet(navController: NavController,viewModel:PAVetViewModel = hiltViewModel()) {
@@ -36,7 +38,9 @@ fun PAVet(navController: NavController,viewModel:PAVetViewModel = hiltViewModel(
             .background(Color(0xffF9F9F9))) {
             LazyColumn(){
                 items(state.data) {item ->
-                    CardVet(data = item?.data, id = item?.id.toString())
+                    CardVet(data = item?.data, id = item?.id.toString()){
+                        navController.navigate("${Route.PAVetDetail}/w")
+                    }
                 }
             }
         }
@@ -46,10 +50,13 @@ fun PAVet(navController: NavController,viewModel:PAVetViewModel = hiltViewModel(
 
 @Preview
 @Composable
-fun CardVet(data:  Map<String, Any>? = mapOf(),id:String = ""){
+fun CardVet(data:  Map<String, Any>? = mapOf(),id:String = "",onClick: () -> Unit = {}){
     if (data?.isNotEmpty() == true){
         Card(modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                onClick.invoke()
+            }
             .height(116.dp)
             .padding(vertical = 4.dp, horizontal = 16.dp)
             .background(Color.White)

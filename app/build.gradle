@@ -6,11 +6,12 @@ plugins {
     id("com.google.dagger.hilt.android")
     id 'dagger.hilt.android.plugin'
     id "kotlin-kapt"
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
 }
 
 android {
     compileSdk 33
-
 
     defaultConfig {
         applicationId "com.example.petsall"
@@ -74,6 +75,8 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:2.6.0"
     implementation 'com.google.firebase:firebase-storage-ktx'
 
+    //coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
 
     //hilt
@@ -91,4 +94,9 @@ dependencies {
     // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.compose.runtime:runtime-livedata:1.4.3")
+
+    //maps
+    implementation 'com.google.maps.android:maps-compose:2.11.0'
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+
 }

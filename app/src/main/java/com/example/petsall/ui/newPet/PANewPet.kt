@@ -2,11 +2,18 @@ package com.example.petsall.ui.newPet
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import android.widget.DatePicker
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -17,12 +24,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,6 +47,8 @@ import com.example.petsall.presentation.newpets.PANewPetsViewModel
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.theme.Black
+import com.example.petsall.ui.theme.BtnBlue
+import com.example.petsall.ui.theme.BtnGreen2
 import com.example.petsall.ui.theme.plata
 import java.util.*
 
@@ -106,12 +122,31 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
         "Yorkshire Terrier",
         "Zuchon"
     )
-    val birthdate = rememberSaveable{ mutableStateOf("") }
+    val birthdate = rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     var selectedPet by rememberSaveable { mutableStateOf("dog") }
     val expandedState = rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+
     var selectedBreed by rememberSaveable { mutableStateOf("") }
+    var selectedImage by remember { mutableStateOf<Bitmap?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            // Aquí puedes realizar las operaciones necesarias con la imagen seleccionada
+            // por ejemplo, cargarla en una variable o guardarla en el almacenamiento
+            if (uri != null) {
+                // Manejar la imagen seleccionada aquí
+                val imageBitmap = loadImageFromUri(uri, context.contentResolver)
+                selectedImage = imageBitmap
+                // Guardar la imagen en una variable
+                Log.d("TAG", imageBitmap.toString())
+                // ...
+            }
+        }
+    )
+
     val color = Color(Black.value)
     val scrollState = rememberScrollState()
     val imageList = listOf(
@@ -120,7 +155,6 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
         "cat" to R.drawable.cat_face,
         "bird" to R.drawable.bird
     )
-    val context = LocalContext.current
     val mYear: Int
     val mMonth: Int
     val mDay: Int
@@ -146,8 +180,7 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     text = "Nuevo registro",
                     color = Color.White,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 10.dp),
+                        .fillMaxWidth(),
                     textAlign = TextAlign.End
                 )
             }, navigationIcon = {
@@ -167,7 +200,7 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 60.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 60.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Selecciona tu mascota",
@@ -254,7 +287,8 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     }
                 }
 
-                OutlinedTextField(value = birthdate.value,
+                OutlinedTextField(
+                    value = birthdate.value,
                     onValueChange = { birthdate.value = it },
                     label = { Text("Fecha de nacimiento") },
                     singleLine = true,
@@ -270,8 +304,10 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         focusedLabelColor = color
                     ),
                     trailingIcon = {
-                        IconButton(onClick = { mDatePickerDialog.show()
-                            Log.d("gvubhnjmk", birthdate.value)}) {
+                        IconButton(onClick = {
+                            mDatePickerDialog.show()
+                            Log.d("gvubhnjmk", birthdate.value)
+                        }) {
                             Icon(
                                 Icons.Filled.DateRange, contentDescription = "fecha"
                             )
@@ -299,16 +335,48 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     textStyle = MaterialTheme.typography.body1,
                 )
 
+                selectedImage?.let { bitmap ->
+
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Imagen seleccionada",
+                        modifier = Modifier
+                            .height(100.dp)
+                            .width(100.dp)
+                            .clip(shape = RoundedCornerShape(50.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+
+                }
+
+                ClickableText(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                textDecoration = TextDecoration.None,
+                                fontSize = 15.sp,
+                                color = BtnBlue
+                            )
+                        ) {
+                            append("Subir foto de perfil")
+                        }
+                    },
+                    onClick = {
+                        launcher.launch("image/*")
+                    }, modifier = Modifier.padding(vertical = 20.dp)
+                )
+
                 ButtonDefault(
                     textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp)
                 ) {
-                    if (name.isNotEmpty()&& birthdate.value.isNotEmpty()&& selectedBreed.isNotEmpty()&& selectedPet.isNotEmpty()){
+                    if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectedBreed.isNotEmpty() && selectedPet.isNotEmpty()) {
                         viewModel.onEvent(
                             PANewPetsEven.Register(
                                 name = name,
                                 birthday = birthdate.value,
                                 breeds = selectedBreed,
-                                pets = selectedPet
+                                pets = selectedPet,
+                                img = selectedImage
                             )
                         )
                         navController.navigate(Route.PAHome)
@@ -349,4 +417,76 @@ fun ImageWithSelection(
     )
 
 
+}
+
+@Composable
+fun MyScreen() {
+    val context = LocalContext.current
+    var selectedImage by remember { mutableStateOf<Bitmap?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            // Aquí puedes realizar las operaciones necesarias con la imagen seleccionada
+            // por ejemplo, cargarla en una variable o guardarla en el almacenamiento
+            if (uri != null) {
+                // Manejar la imagen seleccionada aquí
+                val imageBitmap = loadImageFromUri(uri, context.contentResolver)
+                selectedImage = imageBitmap
+                // Guardar la imagen en una variable
+                Log.d("TAG", imageBitmap.toString())
+                // ...
+            }
+        }
+    )
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        selectedImage?.let { bitmap ->
+
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = "Imagen seleccionada",
+                modifier = Modifier
+                    .height(100.dp)
+                    .width(100.dp)
+                    .clip(shape = RoundedCornerShape(50.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+        }
+
+        ClickableText(
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        textDecoration = TextDecoration.None,
+                        fontSize = 15.sp,
+                        color = BtnBlue
+                    )
+                ) {
+                    append("Subir foto de perfil")
+                }
+            },
+            onClick = {
+                launcher.launch("image/*")
+            }, modifier = Modifier.padding(vertical = 20.dp)
+        )
+
+
+    }
+
+}
+
+fun loadImageFromUri(uri: Uri, contentResolver: ContentResolver): Bitmap? {
+    return try {
+        val inputStream = contentResolver.openInputStream(uri)
+        BitmapFactory.decodeStream(inputStream)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

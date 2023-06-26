@@ -35,6 +35,7 @@ import com.example.petsall.ui.newPet.PANewPet
 import com.example.petsall.ui.perfil.PAPerfil
 import com.example.petsall.ui.signup.PASignUp
 import com.example.petsall.ui.vet.PAVet
+import com.example.petsall.ui.vetdetail.PAVetDetail
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
@@ -123,6 +124,20 @@ class MainActivity : ComponentActivity() {
                                     ?.let {
                                         PAChangePet(
                                             idPet = it,
+                                            navController = navigationController,
+                                        )
+                                    }
+                            }
+                            composable(
+                                "${Route.PAVetDetail}/{vetId}",
+                                arguments = listOf(navArgument("vetId") {
+                                    type = NavType.StringType
+                                })
+                            ) { backStackEntry ->
+                                backStackEntry.arguments?.getString("vetId")
+                                    ?.let {
+                                        PAVetDetail(
+                                            vetDetail = it,
                                             navController = navigationController,
                                         )
                                     }

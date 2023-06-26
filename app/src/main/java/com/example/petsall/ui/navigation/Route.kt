@@ -8,6 +8,8 @@ object Route {
     const val PANewPet = "PANewPet"
     const val PAPerfil = "PAPerfil"
     const val PAChangePet = "PAChangePet"
+    const val PAVetDetail = "PAVetDetail"
+
 
 
 }

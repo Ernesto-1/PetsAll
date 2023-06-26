@@ -1,5 +1,6 @@
 package com.example.petsall.presentation.newpets
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,11 +22,12 @@ class PANewPetsViewModel @Inject constructor(private val useCase: PANewPetsUseCa
         when (event) {
             is PANewPetsEven.Register -> {
                 viewModelScope.launch {
-                    useCase.registerPet(name = event.name, breed = event.breeds, birthday = event.birthday, pet = event.pets).collect() { result ->
+                    useCase.registerPet(name = event.name, breed = event.breeds, birthday = event.birthday, pet = event.pets, img = event.img).collect() { result ->
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
                                 state = state.copy()
+                                Log.d("rtyubnm", result.data.toString())
                             }
                             else -> {}
                         }

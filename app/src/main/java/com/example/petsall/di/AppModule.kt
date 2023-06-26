@@ -15,6 +15,7 @@ import com.example.petsall.domain.vet.PAVetRepoImpl
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -46,6 +47,10 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun provideFirebaseFirestore() = FirebaseFirestore.getInstance()
+
+        @Provides
+        @Singleton
+        fun provideFirebaseStorage() = FirebaseStorage.getInstance()
 
 
     }
