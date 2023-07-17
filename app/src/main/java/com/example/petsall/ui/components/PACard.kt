@@ -31,7 +31,10 @@ fun PACard(iconCard: Int = R.drawable.request,txtCard: String = "",colorIcon: Co
         shape = RoundedCornerShape(12.dp),
         backgroundColor = Color.White) {
         Row() {
-            Icon(painter = painterResource(id = iconCard), contentDescription = "", modifier = Modifier.padding(vertical = 15.dp, horizontal = 15.dp).fillMaxHeight().width(45.dp), tint = colorIcon)
+            Icon(painter = painterResource(id = iconCard), contentDescription = "", modifier = Modifier
+                .padding(vertical = 15.dp, horizontal = 15.dp)
+                .fillMaxHeight()
+                .width(45.dp), tint = colorIcon)
             Column(modifier = Modifier.fillMaxSize(),verticalArrangement = Arrangement.Center) {
                 Text(text = txtCard, modifier = Modifier.fillMaxWidth(),  fontSize = 15.sp)
             }

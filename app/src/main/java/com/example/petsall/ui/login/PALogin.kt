@@ -125,7 +125,12 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         ) {
                             viewModel.onEvent(PALoginEvent.Login(email, password))
                             if (viewModel.state.success){
-                                navController.navigate(Route.PAHome)
+                                navController.navigate(Route.PAHome){
+                                    launchSingleTop = true
+                                    popUpTo(Route.PALogin) {
+                                        inclusive = true
+                                    }
+                                }
                             }
                         }
                         Text(

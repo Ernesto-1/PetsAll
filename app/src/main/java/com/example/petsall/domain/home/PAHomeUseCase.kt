@@ -28,4 +28,14 @@ class PAHomeUseCase @Inject constructor(private val repository: PAHomeRepo) {
                 emit(Resource.Failure(e))
             }
         }
+
+    suspend fun getDatePet(idPet: String): Flow<Resource<List<DocumentSnapshot?>>> =
+        flow {
+            emit(Resource.Loading())
+            try {
+                emit(Resource.Success(repository.getDatePet(idPet = idPet)))
+            } catch (e: Exception) {
+                emit(Resource.Failure(e))
+            }
+        }
 }

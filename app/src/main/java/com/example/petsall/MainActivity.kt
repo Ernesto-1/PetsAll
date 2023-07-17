@@ -1,9 +1,16 @@
 package com.example.petsall
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,10 +19,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.petsall.presentation.vet.PAVetEvent
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.theme.PetsAllTheme
@@ -36,16 +46,35 @@ import com.example.petsall.ui.perfil.PAPerfil
 import com.example.petsall.ui.signup.PASignUp
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
+import com.example.petsall.utils.checkLocationPermission
+import com.example.petsall.utils.permissions
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    var permissionRequestCount = 0
+    private lateinit var requestMultiplePermissions: ActivityResultLauncher<Array<String>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestMultiplePermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val allPermissionsGranted = permissions.values.all { it }
+                if (allPermissionsGranted) {
+                } else {
+                    // Al menos uno de los permisos ha sido denegado
+                    // Realizar acciones necesarias
+                    false
+                }
+            }
+
         setContent {
+
             PetsAllTheme {
                 val navigationController = rememberNavController()
                 val user = Firebase.auth.currentUser
@@ -107,12 +136,13 @@ class MainActivity : ComponentActivity() {
                             composable(Route.PAHome) {
                                 PAHome(
                                     navController = navigationController,
-                                    activity = this@MainActivity
+                                    activity = this@MainActivity,
+                                    requestMultiplePermissions = requestMultiplePermissions
                                 )
                             }
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
-                            composable(Route.PANewPet) { PANewPet(navController = navigationController) }
+                            composable(Route.PANewPet) {  PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
                             composable(
                                 "${Route.PAChangePet}/{petId}",
@@ -137,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                 backStackEntry.arguments?.getString("vetId")
                                     ?.let {
                                         PAVetDetail(
-                                            vetDetail = it,
+                                            vetDetail = it ,
                                             navController = navigationController,
                                         )
                                     }
@@ -152,5 +182,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    fun incrementPermissionRequestCount() {
+        permissionRequestCount++
+    }
+
+
 }
+
+
 

@@ -1,8 +1,13 @@
 package com.example.petsall.presentation.vet
 
+import android.content.Context
+import android.location.Location
+import android.location.LocationManager
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.petsall.domain.vet.PAVetUseCase
@@ -12,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase): ViewModel() {
+class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : ViewModel() {
 
     var state by mutableStateOf(PAVetState())
         private set
@@ -25,7 +30,17 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase): Vie
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                state = state.copy(data = result.data)
+                                val locationValue = Location("location value.")
+                                if (event.location != null) {
+                                    val filterCoordinates = result.data.filter {
+                                        locationValue.latitude = it?.data?.get("Latitud") as Double
+                                        locationValue.longitude = it.data?.get("Longitud") as Double
+                                        event.location.distanceTo(locationValue) < 10000
+                                    }
+                                    state = state.copy(data = filterCoordinates)
+                                }else{
+                                    state = state.copy(data = listOf())
+                                }
                             }
                             else -> {}
                         }

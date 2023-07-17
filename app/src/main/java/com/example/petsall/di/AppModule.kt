@@ -1,5 +1,7 @@
 package com.example.petsall.di
 
+import android.content.Context
+import com.example.petsall.domain.WebService
 import com.example.petsall.domain.changepets.PAChangePetsRepo
 import com.example.petsall.domain.changepets.PAChangePetsRepoImpl
 import com.example.petsall.domain.home.PAHomeRepo
@@ -12,6 +14,9 @@ import com.example.petsall.domain.signup.PASignUpRepo
 import com.example.petsall.domain.signup.PASignUpRepoImpl
 import com.example.petsall.domain.vet.PAVetRepo
 import com.example.petsall.domain.vet.PAVetRepoImpl
+import com.example.petsall.domain.vetdetail.PAVetDetailRepo
+import com.example.petsall.domain.vetdetail.PAVetDetailRepoImpl
+import com.example.petsall.utils.AppConstans
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -20,7 +25,13 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -38,8 +49,35 @@ abstract class AppModule {
     abstract fun providesNewPetsRepository(repoNewPets: PANewPetsRepoImpl): PANewPetsRepo
     @Binds
     abstract fun providesChangePetsRepository(repoChangePets: PAChangePetsRepoImpl): PAChangePetsRepo
+    @Binds
+    abstract fun providesVetDetailsRepository(repoVetDetail: PAVetDetailRepoImpl): PAVetDetailRepo
 
     companion object {
+
+        @Provides
+        fun providesOkHttpClient(@ApplicationContext context: Context): OkHttpClient =
+            OkHttpClient.Builder()
+                .addInterceptor(
+                    HttpLoggingInterceptor().also {
+                        it.setLevel(
+                            HttpLoggingInterceptor.Level.HEADERS
+                        )
+                    }
+                )
+                .build()
+
+        @Provides
+        fun providesRetrofitInstance(client: OkHttpClient): Retrofit {
+            return Retrofit.Builder()
+                .client(client)
+                .baseUrl(AppConstans.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+        }
+
+        @Provides
+        fun providesCurrencyService(retrofit: Retrofit) = retrofit.create<WebService>()
+
         @Provides
         @Singleton
         fun provideFirestore() = FirebaseAuth.getInstance()

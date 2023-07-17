@@ -134,15 +134,9 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
-            // Aquí puedes realizar las operaciones necesarias con la imagen seleccionada
-            // por ejemplo, cargarla en una variable o guardarla en el almacenamiento
             if (uri != null) {
-                // Manejar la imagen seleccionada aquí
                 val imageBitmap = loadImageFromUri(uri, context.contentResolver)
                 selectedImage = imageBitmap
-                // Guardar la imagen en una variable
-                Log.d("TAG", imageBitmap.toString())
-                // ...
             }
         }
     )
@@ -245,7 +239,6 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
             ) {
 
                 Spacer(modifier = Modifier.height(20.dp))
-
 
                 OutlinedTextField(value = selectedBreed,
                     onValueChange = { selectedBreed = it },
@@ -416,68 +409,6 @@ fun ImageWithSelection(
         textAlign = TextAlign.Center
     )
 
-
-}
-
-@Composable
-fun MyScreen() {
-    val context = LocalContext.current
-    var selectedImage by remember { mutableStateOf<Bitmap?>(null) }
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            // Aquí puedes realizar las operaciones necesarias con la imagen seleccionada
-            // por ejemplo, cargarla en una variable o guardarla en el almacenamiento
-            if (uri != null) {
-                // Manejar la imagen seleccionada aquí
-                val imageBitmap = loadImageFromUri(uri, context.contentResolver)
-                selectedImage = imageBitmap
-                // Guardar la imagen en una variable
-                Log.d("TAG", imageBitmap.toString())
-                // ...
-            }
-        }
-    )
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        selectedImage?.let { bitmap ->
-
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Imagen seleccionada",
-                modifier = Modifier
-                    .height(100.dp)
-                    .width(100.dp)
-                    .clip(shape = RoundedCornerShape(50.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-        }
-
-        ClickableText(
-            text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        textDecoration = TextDecoration.None,
-                        fontSize = 15.sp,
-                        color = BtnBlue
-                    )
-                ) {
-                    append("Subir foto de perfil")
-                }
-            },
-            onClick = {
-                launcher.launch("image/*")
-            }, modifier = Modifier.padding(vertical = 20.dp)
-        )
-
-
-    }
 
 }
 

@@ -54,6 +54,19 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                     }
                 }
             }
+            is PAHomeEvent.GetDatePet ->{
+                viewModelScope.launch {
+                    useCase.getDatePet(event.idPet).collect() { result ->
+                        when (result) {
+                            is Resource.Loading -> {}
+                            is Resource.Success -> {
+                                state = state.copy(datePet = result.data)
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+            }
             else -> {}
         }
     }

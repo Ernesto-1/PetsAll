@@ -8,6 +8,8 @@ data class PAHomeState(
     var message: String = "",
     var success: Boolean = false,
     var data: Map<String, Any>? = mapOf(),
-    var dataPets: List<DocumentSnapshot?> = listOf()
+    var dataPets: List<DocumentSnapshot?> = listOf(),
+    var datePet: List<DocumentSnapshot?> = listOf()
+
 
 )
