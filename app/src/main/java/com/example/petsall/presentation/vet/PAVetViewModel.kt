@@ -1,20 +1,19 @@
 package com.example.petsall.presentation.vet
 
-import android.content.Context
 import android.location.Location
-import android.location.LocationManager
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.petsall.domain.vet.PAVetUseCase
 import com.example.petsall.utils.Resource
+import com.google.firebase.firestore.DocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.log
 
 @HiltViewModel
 class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : ViewModel() {
@@ -46,9 +45,7 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                         }
                     }
                 }
-
             }
-            else -> {}
         }
     }
 }

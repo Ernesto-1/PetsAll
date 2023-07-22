@@ -42,8 +42,8 @@ fun PAVet(
     LaunchedEffect(Unit) {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (checkLocationPermission(context)) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { locationn: Location? ->
-                    location = locationn
+            fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
+                    location = loc
                     viewModel.onEvent(PAVetEvent.GetDataUser(location = location))
             }
         }
@@ -78,8 +78,6 @@ fun PAVet(
 
         }
     }
-
-
 }
 
 @Preview

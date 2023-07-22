@@ -36,6 +36,7 @@ class PALoginViewModel @Inject constructor(private val useCase: PALogginUseCase)
                                 state = state.copy(
                                     success = true
                                 )
+                                Log.d("vgbhnjmk", result.data?.uid.toString())
                             }
                             is Resource.Failure -> {
                                 Log.d("rftyghuj", result.exception.message.toString())
@@ -47,6 +48,7 @@ class PALoginViewModel @Inject constructor(private val useCase: PALogginUseCase)
                                     } else {
                                         state.copy(message = "")
                                     }
+
                             }
                             else -> {}
                         }

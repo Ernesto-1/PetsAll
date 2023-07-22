@@ -2,7 +2,6 @@ package com.example.petsall.ui.vetdetail
 
 import android.annotation.SuppressLint
 import android.location.Location
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -47,8 +46,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
+
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -58,7 +57,7 @@ fun PAVetDetail(
     viewModel: PAVetDetailViewModel = hiltViewModel()
 ) {
     val date = rememberSaveable { mutableStateOf("") }
-    val problemDate = listOf("Consulta general","Vacunacion")
+    val problemDate = listOf("Consulta general", "Vacunacion")
     val expandedState = rememberSaveable { mutableStateOf(false) }
     val expandedStateConsult = rememberSaveable { mutableStateOf(false) }
     var selectedTime by rememberSaveable { mutableStateOf("") }
@@ -68,8 +67,7 @@ fun PAVetDetail(
     val uiSettings by remember {
         mutableStateOf(
             MapUiSettings(
-                myLocationButtonEnabled = true,
-                zoomControlsEnabled = false
+                myLocationButtonEnabled = true, zoomControlsEnabled = false
             )
         )
     }
@@ -85,15 +83,16 @@ fun PAVetDetail(
     mYear = mCalendar.get(Calendar.YEAR)
     mCalendar.time = Date()
 
-    val mDatePickerDialog = datePicker(date = date, context = context,focusManager = focusManager)
-    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    val mDatePickerDialog = datePicker(date = date, context = context, focusManager = focusManager)
+    val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
 
     BackHandler {
         navController.navigateUp()
     }
 
     LaunchedEffect(Unit) {
-        if (vetDetail.isNotEmpty()){
+        if (vetDetail.isNotEmpty()) {
             viewModel.onEvent(PAVetDetailEvent.GetVet(vetDetail))
         }
 
@@ -104,287 +103,290 @@ fun PAVetDetail(
         }
     }
 
-
-
     if (!state.dataVet.isNullOrEmpty() && checkLocationPermission(context)) {
-        val businessLocation =
-            LatLng(
-                state.dataVet?.get("Latitud") as Double,
-                state.dataVet?.get("Longitud") as Double
-            )
-        val myLocation =
-            location?.latitude?.let {
-                location?.longitude?.let { it1 ->
-                    LatLng(
-                        it,
-                        it1
-                    )
-                }
+        val businessLocation = LatLng(
+            state.dataVet?.get("Latitud") as Double, state.dataVet?.get("Longitud") as Double
+        )
+        val myLocation = location?.latitude?.let {
+            location?.longitude?.let { it1 ->
+                LatLng(
+                    it, it1
+                )
             }
+        }
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(businessLocation, 15f)
         }
         val totalLocation = myLocation?.let {
-            LatLngBounds.Builder()
-                .include(businessLocation)
-                .include(it)
-                .build()
+            LatLngBounds.Builder().include(businessLocation).include(it).build()
         }
 
-        val availableTimes = generateAvailableTimes(state.dataVet?.get("HInicio").toString(),state.dataVet?.get("HFin").toString())
+        val availableTimes = generateAvailableTimes(
+            state.dataVet?.get("HInicio").toString(), state.dataVet?.get("HFin").toString()
+        )
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = state.dataVet!!["Nombre"].toString(),
-                            color = Color.White,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(end = 10.dp),
-                            textAlign = TextAlign.End
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Atrás",
-                                tint = Color.White
-                            )
-                        }
-                    }, backgroundColor = Color(
-                        0xff84B1B8
-                    )
+        Scaffold(topBar = {
+            TopAppBar(title = {
+                Text(
+                    text = state.dataVet!!["Nombre"].toString(),
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 10.dp),
+                    textAlign = TextAlign.End
                 )
-            }, content = {
-                mDatePickerDialog.datePicker.minDate = mCalendar.timeInMillis
-                mCalendar.set(mYear + 1, 11 , 31)
-                mDatePickerDialog.datePicker.maxDate = mCalendar.timeInMillis
-                ModalBottomSheetLayout(
-                    sheetState = sheetState,
-                    sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                    modifier = Modifier.padding(0.dp),
-                    sheetContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(BtnBlue)
-                                .wrapContentWidth(unbounded = false)
-                                .wrapContentHeight()
+            }, navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Atrás",
+                        tint = Color.White
+                    )
+                }
+            }, backgroundColor = Color(
+                0xff84B1B8
+            )
+            )
+        }, content = {
+            mDatePickerDialog.datePicker.minDate = mCalendar.timeInMillis
+            mCalendar.set(mYear + 1, 11, 31)
+            mDatePickerDialog.datePicker.maxDate = mCalendar.timeInMillis
+            ModalBottomSheetLayout(sheetState = sheetState,
+                sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                modifier = Modifier.padding(0.dp),
+                sheetContent = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BtnBlue)
+                            .wrapContentWidth(unbounded = false)
+                            .wrapContentHeight(unbounded = true)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.Start
                         ) {
+                            HeaderBottomSheet()
                             Column(
-                                horizontalAlignment = Alignment.Start
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(327.dp)
+                                    .background(Color.White)
+                                    .verticalScroll(rememberScrollState()),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                HeaderBottomSheet(
-                                    "Cita",
-                                    Icons.Filled.Close
-                                ) {
-                                    coroutine.launch { sheetState.hide() }
-                                    date.value = ""
-                                }
-                                Column(
+                                Spacer(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(327.dp)
+                                        .height(20.dp)
                                         .background(Color.White)
-                                        .verticalScroll(rememberScrollState()),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                )
+                                OutlinedTextField(value = date.value,
+                                    onValueChange = { date.value = it },
+                                    label = { Text("Fecha de la cita") },
+                                    singleLine = true,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .width(282.dp)
+                                        .padding(vertical = 5.dp),
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = plata,
+                                        unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
+                                            alpha = 0.15f
+                                        ),
+                                        textColor = color,
+                                        focusedLabelColor = color
+                                    ),
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            mDatePickerDialog.show()
+                                        }) {
+                                            Icon(
+                                                Icons.Filled.DateRange,
+                                                contentDescription = "fecha"
+                                            )
+                                        }
+                                    },
+                                    readOnly = true,
+                                    enabled = false
+                                )
+
+                                OutlinedTextField(value = selectedTime,
+                                    onValueChange = { selectedTime = it },
+                                    label = { Text("Selecciona un horario") },
+                                    singleLine = true,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .width(282.dp)
+                                        .padding(vertical = 5.dp),
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = plata,
+                                        unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
+                                            alpha = 0.15f
+                                        ),
+                                        textColor = color,
+                                        focusedLabelColor = color
+                                    ),
+                                    textStyle = MaterialTheme.typography.body1,
+                                    trailingIcon = {
+                                        IconButton(onClick = { expandedState.value = true }) {
+                                            Icon(
+                                                Icons.Filled.ArrowDropDown,
+                                                contentDescription = "Expandir opciones"
+                                            )
+                                        }
+                                    },
+                                    readOnly = true,
+                                    enabled = false
+                                )
+                                DropdownMenu(expanded = expandedState.value,
+                                    onDismissRequest = { expandedState.value = false }) {
+                                    availableTimes.forEach { times ->
+                                        DropdownMenuItem(onClick = {
+                                            selectedTime = times
+                                            expandedState.value = false
+                                        }) {
+                                            Text(text = times)
+                                        }
+                                    }
+                                }
+
+                                Text(
+                                    text = "Selecciona al paciente",
+                                    modifier = Modifier.padding(vertical = 5.dp)
+                                )
+                                LazyRow(
+                                    contentPadding = PaddingValues(
+                                        horizontal = 40.dp, vertical = 8.dp
+                                    ), horizontalArrangement = Arrangement.spacedBy(15.dp)
                                 ) {
-                                    Spacer(
-                                        modifier = Modifier
-                                            .height(20.dp)
-                                            .background(Color.White)
-                                    )
-                                    OutlinedTextField(
-                                        value = date.value,
-                                        onValueChange = { date.value = it },
-                                        label = { Text("Fecha de la cita") },
-                                        singleLine = true,
-                                        shape = RoundedCornerShape(12.dp),
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .width(282.dp)
-                                            .padding(vertical = 5.dp),
-                                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                                            focusedBorderColor = plata,
-                                            unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-                                            textColor = color,
-                                            focusedLabelColor = color
-                                        ),
-                                        trailingIcon = {
-                                            IconButton(onClick = {
-                                                mDatePickerDialog.show()
-                                            }) {
-                                                Icon(
-                                                    Icons.Filled.DateRange, contentDescription = "fecha"
-                                                )
-                                            }
-                                        },
-                                        readOnly = true, enabled = false
-                                    )
-
-                                    OutlinedTextField(value = selectedTime,
-                                        onValueChange = { selectedTime = it },
-                                        label = { Text("Selecciona un horario") },
-                                        singleLine = true,
-                                        shape = RoundedCornerShape(12.dp),
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .width(282.dp)
-                                            .padding(vertical = 5.dp),
-                                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                                            focusedBorderColor = plata,
-                                            unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-                                            textColor = color,
-                                            focusedLabelColor = color
-                                        ),
-                                        textStyle = MaterialTheme.typography.body1,
-                                        trailingIcon = {
-                                            IconButton(onClick = { expandedState.value = true }) {
-                                                Icon(
-                                                    Icons.Filled.ArrowDropDown,
-                                                    contentDescription = "Expandir opciones"
-                                                )
-                                            }
-                                        },
-                                        readOnly = true,enabled = false
-                                    )
-                                    DropdownMenu(expanded = expandedState.value,
-                                        onDismissRequest = { expandedState.value = false }) {
-                                        availableTimes.forEach { times ->
-                                            DropdownMenuItem(onClick = {
-                                                selectedTime = times
-                                                expandedState.value = false
-                                            }) {
-                                                Text(text = times)
-                                            }
-                                        }
-                                    }
-
-                                    Text(text = "Selecciona al paciente", modifier = Modifier.padding(vertical = 5.dp))
-                                    LazyRow(
-                                        contentPadding = PaddingValues(horizontal = 40.dp, vertical = 8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(15.dp)
-                                    ) {
-                                        items(state.dataPets) { item ->
-                                            CardDateOfPet(data = item?.data, "", isSelected = selectedImage == item?.id.toString()
-                                                ,onClick = { selectedImage =  item?.id.toString()})
-                                        }
-
-                                    }
-
-                                    OutlinedTextField(value = selectedProblem,
-                                        onValueChange = { selectedProblem = it },
-                                        label = { Text("Selecciona el motivo") },
-                                        singleLine = true,
-                                        shape = RoundedCornerShape(12.dp),
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .width(282.dp)
-                                            .padding(vertical = 5.dp),
-                                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                                            focusedBorderColor = plata,
-                                            unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-                                            textColor = color,
-                                            focusedLabelColor = color
-                                        ),
-                                        textStyle = MaterialTheme.typography.body1,
-                                        trailingIcon = {
-                                            IconButton(onClick = { expandedStateConsult.value = true }) {
-                                                Icon(
-                                                    Icons.Filled.ArrowDropDown,
-                                                    contentDescription = "Expandir opciones"
-                                                )
-                                            }
-                                        },
-                                        readOnly = true,enabled = false
-                                    )
-                                    DropdownMenu(expanded = expandedStateConsult.value,
-                                        onDismissRequest = { expandedStateConsult.value = false }) {
-                                        problemDate.forEach { problem ->
-                                            DropdownMenuItem(onClick = {
-                                                selectedProblem = problem
-                                                expandedStateConsult.value = false
-                                            }) {
-                                                Text(text = problem)
-                                            }
-                                        }
+                                    items(state.dataPets) { item ->
+                                        CardDateOfPet(data = item?.data,
+                                            "",
+                                            isSelected = selectedImage == item?.id.toString(),
+                                            onClick = { selectedImage = item?.id.toString() })
                                     }
 
                                 }
-                                Card(
-                                    elevation = 1.dp, modifier = Modifier
-                                        .height(88.dp)
-                                        .fillMaxWidth()
-                                        .shadow(10.dp)
-                                ) {
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        ButtonDefault(
-                                            modifier = Modifier
-                                                .align(alignment = Alignment.Center)
-                                                .height(48.dp)
-                                                .width(216.dp),
-                                            enabled = !enableButton,
-                                            textButton = "Solicitar cita",
-                                            onClick = {
-                                                viewModel.onEvent(PAVetDetailEvent.RegisterDate(day = date.value, time = selectedTime, patient = selectedImage, reason = selectedProblem, idVet = vetDetail))
-                                                coroutine.launch { sheetState.hide() }
-                                            }
-                                        )
+
+                                OutlinedTextField(
+                                    value = selectedProblem,
+                                    onValueChange = { selectedProblem = it },
+                                    label = { Text("Selecciona el motivo") },
+                                    singleLine = true,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .width(282.dp)
+                                        .padding(vertical = 5.dp),
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = plata,
+                                        unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
+                                            alpha = 0.15f
+                                        ),
+                                        textColor = color,
+                                        focusedLabelColor = color
+                                    ),
+                                    textStyle = MaterialTheme.typography.body1,
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            expandedStateConsult.value = true
+                                        }) {
+                                            Icon(
+                                                Icons.Filled.ArrowDropDown,
+                                                contentDescription = "Expandir opciones"
+                                            )
+                                        }
+                                    },
+                                    readOnly = true,
+                                    enabled = false
+                                )
+                                DropdownMenu(expanded = expandedStateConsult.value,
+                                    onDismissRequest = { expandedStateConsult.value = false }) {
+                                    problemDate.forEach { problem ->
+                                        DropdownMenuItem(onClick = {
+                                            selectedProblem = problem
+                                            expandedStateConsult.value = false
+                                        }) {
+                                            Text(text = problem)
+                                        }
                                     }
+                                }
+
+                            }
+                            Card(
+                                elevation = 1.dp,
+                                modifier = Modifier
+                                    .height(88.dp)
+                                    .fillMaxWidth()
+                                    .shadow(10.dp)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    ButtonDefault(modifier = Modifier
+                                        .align(alignment = Alignment.Center)
+                                        .height(48.dp)
+                                        .width(216.dp),
+                                        enabled = !enableButton,
+                                        textButton = "Solicitar cita",
+                                        onClick = {
+                                            viewModel.onEvent(
+                                                PAVetDetailEvent.RegisterDate(
+                                                    day = date.value,
+                                                    time = selectedTime,
+                                                    patient = selectedImage,
+                                                    reason = selectedProblem,
+                                                    idVet = vetDetail
+                                                )
+                                            )
+                                            coroutine.launch { sheetState.hide() }
+                                        })
                                 }
                             }
                         }
                     }
+                }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp)
                 ) {
-                    Column(
+                    Card(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp)
+                            .fillMaxWidth()
+                            .height(220.dp)
+                            .background(Color.White)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
+                        elevation = 5.dp
                     ) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp)
-                                .background(Color.White)
-                                .clip(RoundedCornerShape(16.dp))
-                                .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
-                            elevation = 5.dp
+                        GoogleMap(
+                            modifier = Modifier.fillMaxSize(),
+                            cameraPositionState = cameraPositionState,
+                            uiSettings = uiSettings,
+                            properties = MapProperties(
+                                isMyLocationEnabled = true,
+                                minZoomPreference = 14.5f,
+                                maxZoomPreference = 16.0f,
+                                latLngBoundsForCameraTarget = totalLocation
+                            )
                         ) {
-                            GoogleMap(
-                                modifier = Modifier.fillMaxSize(),
-                                cameraPositionState = cameraPositionState,
-                                uiSettings = uiSettings,
-                                properties = MapProperties(
-                                    isMyLocationEnabled = true,
-                                    minZoomPreference = 14.5f,
-                                    maxZoomPreference = 16.0f,
-                                    latLngBoundsForCameraTarget = totalLocation
-                                )) {
-                                Marker(
-                                    state = MarkerState(position = businessLocation),
-                                    title = "Singapore",
-                                    snippet = "Marker in Singapore",
-                                )
-                                MapProperties(isMyLocationEnabled = true, isTrafficEnabled = true)
-                            }
+                            Marker(
+                                state = MarkerState(position = businessLocation),
+                                title = "Singapore",
+                                snippet = "Marker in Singapore",
+                            )
+                            MapProperties(isMyLocationEnabled = true, isTrafficEnabled = true)
                         }
-                        Button(onClick = {
-                            coroutine.launch {
-                                sheetState.show()
-                                viewModel.onEvent(PAVetDetailEvent.GetDataPets(""))
-                            }
-                        }) {
-
+                    }
+                    Button(onClick = {
+                        coroutine.launch {
+                            sheetState.show()
+                            viewModel.onEvent(PAVetDetailEvent.GetDataPets(""))
                         }
+                    }) {
                     }
                 }
-
-            })
-
+            }
+        })
     }
 }
-
-

@@ -43,10 +43,11 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
+                                state = state.copy(numPets = result.data.size < 4 , dataPets = result.data )
                                 state = if (event.pet?.isNotEmpty() == true){
-                                    state.copy(dataPets = result.data.filter { it?.id == event.pet })
+                                    state.copy(dataPet = result.data.first() { it?.id == event.pet })
                                 }else{
-                                    state.copy(dataPets = result.data)
+                                    state.copy(dataPet = result.data.first())
                                 }
                             }
                             else -> {}

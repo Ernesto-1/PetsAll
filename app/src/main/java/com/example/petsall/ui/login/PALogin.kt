@@ -5,16 +5,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.R
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -34,9 +40,19 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
     var password by rememberSaveable { mutableStateOf("") }
     var hidden by rememberSaveable { mutableStateOf(true) } //1
     val color = Color(Black.value)
-
-    LaunchedEffect(true) {
-
+    val state = viewModel.state
+    val focusRequester = remember { FocusRequester() }
+    val screenWidth = LocalConfiguration.current.screenHeightDp.dp
+    val imageHeight = (screenWidth * 0.55f)
+    LaunchedEffect(state.success) {
+        if (state.success){
+            navController.navigate(Route.PAHome){
+                launchSingleTop = true
+                popUpTo(Route.PALogin) {
+                    inclusive = true
+                }
+            }
+        }
     }
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -45,12 +61,12 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(id = com.example.petsall.R.drawable.dise_o_sin_t_tulo),
+                    painter = painterResource(id = com.example.petsall.R.drawable.all_pets_logo),
                     contentDescription = "img_login",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp),
-                    contentScale = ContentScale.Fit
+                        .height(imageHeight),
+                    contentScale = ContentScale.Crop
                 )
 
                 Column(
@@ -68,9 +84,15 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                             .fillMaxWidth()
                             .wrapContentHeight(),
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
                         ),shape = RoundedCornerShape(16.dp),
                         singleLine = true,
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                focusRequester.requestFocus()
+                            }
+                        ),
                         textStyle = MaterialTheme.typography.body1,
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = plata,
@@ -79,7 +101,7 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
                     OutlinedTextField(
                         value = password,
@@ -87,7 +109,8 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         label = { Text("Contraseña") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentHeight(),
+                            .wrapContentHeight()
+                            .focusRequester(focusRequester),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password
                         ), shape = RoundedCornerShape(16.dp),
@@ -102,6 +125,11 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                                 }
                             }
                         },
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                viewModel.onEvent(PALoginEvent.Login(email, password))
+                            }
+                        ),
                         singleLine = true,
                         visualTransformation = if (hidden) PasswordVisualTransformation() else VisualTransformation.None,
                         textStyle = MaterialTheme.typography.body1,
@@ -121,17 +149,9 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ButtonDefault(
-                            textButton = "Iniciar sesion", modifier = Modifier.fillMaxWidth()
+                            textButton = "Iniciar sesion", modifier = Modifier.wrapContentWidth()
                         ) {
                             viewModel.onEvent(PALoginEvent.Login(email, password))
-                            if (viewModel.state.success){
-                                navController.navigate(Route.PAHome){
-                                    launchSingleTop = true
-                                    popUpTo(Route.PALogin) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
                         }
                         Text(
                             text = "Olvide mi contraseña",

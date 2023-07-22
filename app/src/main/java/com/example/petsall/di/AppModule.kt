@@ -4,6 +4,8 @@ import android.content.Context
 import com.example.petsall.domain.WebService
 import com.example.petsall.domain.changepets.PAChangePetsRepo
 import com.example.petsall.domain.changepets.PAChangePetsRepoImpl
+import com.example.petsall.domain.emergency.PAEmergencyRepo
+import com.example.petsall.domain.emergency.PAEmergencyRepoImpl
 import com.example.petsall.domain.home.PAHomeRepo
 import com.example.petsall.domain.home.PAHomeRepoImpl
 import com.example.petsall.domain.loggin.PALogginRepo
@@ -51,6 +53,8 @@ abstract class AppModule {
     abstract fun providesChangePetsRepository(repoChangePets: PAChangePetsRepoImpl): PAChangePetsRepo
     @Binds
     abstract fun providesVetDetailsRepository(repoVetDetail: PAVetDetailRepoImpl): PAVetDetailRepo
+    @Binds
+    abstract fun providesEmergencyRepository(repoEmergency: PAEmergencyRepoImpl): PAEmergencyRepo
 
     companion object {
 

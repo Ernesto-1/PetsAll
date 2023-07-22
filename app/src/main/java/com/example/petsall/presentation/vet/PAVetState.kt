@@ -7,5 +7,8 @@ data class PAVetState(
     val error: Boolean = false,
     var message: String = "",
     var success: Boolean = false,
-    var data: List<DocumentSnapshot?> = listOf()
+    var data: List<DocumentSnapshot?> = listOf(),
+    var dis: Int = 100
+
+
 )

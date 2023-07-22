@@ -1,31 +1,32 @@
 package com.example.petsall
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.ReportFragment.Companion.reportFragment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -34,8 +35,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.petsall.presentation.vet.PAVetEvent
+import coil.compose.AsyncImage
+import com.example.petsall.presentation.home.PAHomeEvent
+import com.example.petsall.presentation.home.PAHomeViewModel
 import com.example.petsall.ui.changepet.PAChangePet
+import com.example.petsall.ui.emergency.PAEmergency
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.login.PALogin
@@ -46,24 +50,21 @@ import com.example.petsall.ui.perfil.PAPerfil
 import com.example.petsall.ui.signup.PASignUp
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
-import com.example.petsall.utils.checkLocationPermission
-import com.example.petsall.utils.permissions
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity() : ComponentActivity() {
     var permissionRequestCount = 0
     private lateinit var requestMultiplePermissions: ActivityResultLauncher<Array<String>>
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestMultiplePermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        requestMultiplePermissions =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 val allPermissionsGranted = permissions.values.all { it }
                 if (allPermissionsGranted) {
                 } else {
@@ -74,59 +75,55 @@ class MainActivity : ComponentActivity() {
             }
 
         setContent {
-
             PetsAllTheme {
                 val navigationController = rememberNavController()
                 val user = Firebase.auth.currentUser
                 val items = listOf(
                     Menu(Route.PAHome, Icons.Filled.Home, "Inicio"),
                     Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
-                    Menu(Route.PAPerfil, Icons.Filled.Person, "Perfil")
+                    Menu(Route.PAEmergency, Icons.Filled.Warning, "Emergencia"),
+                    Menu(Route.PAPerfil, Icons.Filled.Person, "Perfil"),
                 )
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
-                    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
-                        val navBackStackEntry by navigationController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
-                        if (currentDestination?.route in listOf(
-                                Route.PAHome,
-                                Route.PAVet,
-                                Route.PAPerfil
-                            )
-                        ) {
-                            BottomNavigation {
-                                items.forEach { item ->
-                                    BottomNavigationItem(modifier = Modifier.background(
-                                        Color(
-                                            0xff84B1B8
-                                        )
-                                    ),
-                                        icon = {
-                                            Icon(
-                                                item.icon,
-                                                contentDescription = null
+                    Scaffold(bottomBar = {
+                            val navBackStackEntry by navigationController.currentBackStackEntryAsState()
+                            val currentDestination = navBackStackEntry?.destination
+                            if (currentDestination?.route in listOf(
+                                    Route.PAHome, Route.PAEmergency, Route.PAVet, Route.PAPerfil
+
+                                )
+                            ) {
+                                BottomNavigation {
+                                    items.forEach { item ->
+                                        BottomNavigationItem(modifier = Modifier.background(
+                                            Color(
+                                                0xff84B1B8
                                             )
-                                        },
-                                        label = { Text(item.label) },
-                                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                                        onClick = {
-                                            if (user != null || item.route != Route.PALogin) {
-                                                navigationController.navigate(item.route) {
-                                                    popUpTo(navigationController.graph.findStartDestination().id) {
-                                                        saveState = true
+                                        ),
+                                            icon = {
+                                                Icon(
+                                                    item.icon, contentDescription = null
+                                                )
+                                            },
+                                            label = { Text(item.label) },
+                                            selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                                            onClick = {
+                                                if (user != null || item.route != Route.PALogin) {
+                                                    navigationController.navigate(item.route) {
+                                                        popUpTo(navigationController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
                                                     }
-                                                    launchSingleTop = true
-                                                    restoreState = true
                                                 }
-                                            }
-                                        }
-                                    )
+                                            })
+                                    }
                                 }
                             }
-                        }
-                    }) { innerPadding ->
+                        }) { innerPadding ->
                         NavHost(
                             navController = navigationController,
                             startDestination = if (user != null) Route.PAHome else Route.PALogin,
@@ -142,7 +139,8 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
-                            composable(Route.PANewPet) {  PANewPet(navController = navigationController) }
+                            composable(Route.PAEmergency) { PAEmergency() }
+                            composable(Route.PANewPet) { PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
                             composable(
                                 "${Route.PAChangePet}/{petId}",
@@ -150,13 +148,12 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                backStackEntry.arguments?.getString("petId")
-                                    ?.let {
-                                        PAChangePet(
-                                            idPet = it,
-                                            navController = navigationController,
-                                        )
-                                    }
+                                backStackEntry.arguments?.getString("petId")?.let {
+                                    PAChangePet(
+                                        idPet = it,
+                                        navController = navigationController,
+                                    )
+                                }
                             }
                             composable(
                                 "${Route.PAVetDetail}/{vetId}",
@@ -164,13 +161,12 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                backStackEntry.arguments?.getString("vetId")
-                                    ?.let {
-                                        PAVetDetail(
-                                            vetDetail = it ,
-                                            navController = navigationController,
-                                        )
-                                    }
+                                backStackEntry.arguments?.getString("vetId")?.let {
+                                    PAVetDetail(
+                                        vetDetail = it,
+                                        navController = navigationController,
+                                    )
+                                }
                             }
 
 
@@ -182,6 +178,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     fun incrementPermissionRequestCount() {
         permissionRequestCount++
     }
