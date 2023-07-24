@@ -1,5 +1,6 @@
 package com.example.petsall.presentation.changepets
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -17,25 +18,29 @@ class PAChangePetsViewModel @Inject constructor(private val useCase: PAChangePet
     var state by mutableStateOf(PAChangePetsState())
         private set
 
-    init {
-    onEvent(PAChangePetsEvent.GetDataPets(""))
-    }
-
         fun onEvent(event: PAChangePetsEvent) {
         when (event) {
             is PAChangePetsEvent.GetDataPets -> {
                 viewModelScope.launch {
-                    useCase.getPets().collect() { result ->
+                    useCase.getPets(event.pet).collect() { result ->
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
                                 state = state.copy(dataPets = result.data)
+                                searchQuery("")
                             }
                             else -> {}
                         }
                     }
                 }
             }
+        }
+    }
+    fun searchQuery(query: String){
+        if (query.isNotEmpty()){
+            state = state.copy(dataPetsSearch = state.dataPets?.filter { it.toString().contains(query,ignoreCase = true)})
+        }else{
+            state = state.copy(dataPetsSearch = state.dataPets)
         }
     }
 }

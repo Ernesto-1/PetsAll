@@ -7,5 +7,6 @@ data class PAChangePetsState(
     val error: Boolean = false,
     var message: String = "",
     var success: Boolean = false,
-    var dataPets: List<DocumentSnapshot?> = listOf()
+    var dataPets: List<*>? = null,
+    var dataPetsSearch: List<Any?>? = listOf()
 )

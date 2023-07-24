@@ -34,6 +34,7 @@ import com.example.petsall.ui.components.bottom.HeaderBottomSheet
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.theme.BtnBlue
+import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.plata
 import com.example.petsall.utils.checkLocationPermission
 import com.example.petsall.utils.datePicker
@@ -129,7 +130,7 @@ fun PAVetDetail(
             TopAppBar(title = {
                 Text(
                     text = state.dataVet!!["Nombre"].toString(),
-                    color = Color.White,
+                    color = Snacbar,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 10.dp),
@@ -140,12 +141,10 @@ fun PAVetDetail(
                     Icon(
                         Icons.Default.ArrowBack,
                         contentDescription = "Atrás",
-                        tint = Color.White
+                        tint = Snacbar
                     )
                 }
-            }, backgroundColor = Color(
-                0xff84B1B8
-            )
+            }, backgroundColor = Color.White, elevation = 0.dp
             )
         }, content = {
             mDatePickerDialog.datePicker.minDate = mCalendar.timeInMillis

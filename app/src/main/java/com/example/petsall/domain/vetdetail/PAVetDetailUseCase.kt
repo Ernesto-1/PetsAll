@@ -49,4 +49,14 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
                 emit(Resource.Failure(e))
             }
         }
+
+    suspend fun getPets(): Flow<Resource<List<DocumentSnapshot?>>> =
+        flow {
+            emit(Resource.Loading())
+            try {
+                emit(Resource.Success(repository.getDataPets()))
+            } catch (e: Exception) {
+                emit(Resource.Failure(e))
+            }
+        }
 }

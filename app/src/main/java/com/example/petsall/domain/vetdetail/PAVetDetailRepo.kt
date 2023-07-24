@@ -11,5 +11,7 @@ interface PAVetDetailRepo {
 
     suspend fun registerDate(day:String, time: String, patient: String, reason: String,idVet:String): Boolean
 
+    suspend fun getDataPets(): List<DocumentSnapshot?>
+
 
 }

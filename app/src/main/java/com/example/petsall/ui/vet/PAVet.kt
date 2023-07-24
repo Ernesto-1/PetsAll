@@ -33,14 +33,13 @@ fun PAVet(
     navController: NavController,
     viewModel: PAVetViewModel = hiltViewModel(),
 ) {
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    val context = LocalContext.current
+    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     val state = viewModel.state
     var location by remember { mutableStateOf<Location?>(null) }
-    val context = LocalContext.current
 
 
     LaunchedEffect(Unit) {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         if (checkLocationPermission(context)) {
             fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
                     location = loc
@@ -116,7 +115,19 @@ fun CardVet(location: Location = Location(""), data: Map<String, Any>? = mapOf()
                     )
                     Text(text = "4.9", fontSize = 10.sp)
                 }
-                Text(text = "Mascotas: Perros y gatos", fontSize = 12.sp)
+                val listSpecialized = data["specialized_sector"] as List<*>
+
+                Text(buildString {
+                    for (index in listSpecialized.indices) {
+                        append(listSpecialized[index])
+                        when (index) {
+                            listSpecialized.size - 2 -> append(" y ")
+                            listSpecialized.size - 1 -> continue
+                            else -> append(", ")
+                        }
+                    }
+                },  fontSize = 12.sp)
+
                 Text(text = "${distancia.split(".")[0]}m", fontSize = 12.sp)
             }
 

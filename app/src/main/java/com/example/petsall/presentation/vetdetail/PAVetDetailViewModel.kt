@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailUseCase,private val useCaseDataPets: PAChangePetsUseCase) : ViewModel() {
+class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailUseCase) : ViewModel() {
 
     var state by mutableStateOf(PAVetDetailState())
         private set
@@ -53,7 +53,7 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
             }
             is PAVetDetailEvent.GetDataPets -> {
                 viewModelScope.launch {
-                    useCaseDataPets.getPets().collect() { result ->
+                    useCase.getPets().collect() { result ->
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {

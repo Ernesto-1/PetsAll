@@ -3,6 +3,7 @@ package com.example.petsall.data.remote.vetdetail
 import android.util.Log
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.domain.WebService
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -10,6 +11,7 @@ import javax.inject.Inject
 import kotlin.math.log
 
 class PAVetDetailDataSource @Inject constructor(
+    private val firebaseAuth: FirebaseAuth,
     private val webService: WebService,
     private val firebaseFirestore: FirebaseFirestore
 ) {
@@ -48,5 +50,10 @@ class PAVetDetailDataSource @Inject constructor(
         } else {
             false
         }
+    }
+
+    suspend fun getDataPets(): List<DocumentSnapshot?> {
+        val dataPets = firebaseFirestore.collection("Users").document(firebaseAuth.uid.toString()).collection("Mascotas").get().await()
+        return dataPets.documents
     }
 }

@@ -78,6 +78,7 @@ class MainActivity() : ComponentActivity() {
             PetsAllTheme {
                 val navigationController = rememberNavController()
                 val user = Firebase.auth.currentUser
+                var selectMenu by rememberSaveable { mutableStateOf("Inicio") }
                 val items = listOf(
                     Menu(Route.PAHome, Icons.Filled.Home, "Inicio"),
                     Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
@@ -97,17 +98,13 @@ class MainActivity() : ComponentActivity() {
                             ) {
                                 BottomNavigation {
                                     items.forEach { item ->
-                                        BottomNavigationItem(modifier = Modifier.background(
-                                            Color(
-                                                0xff84B1B8
-                                            )
-                                        ),
+                                        BottomNavigationItem(modifier = Modifier.background(Color.White),
                                             icon = {
                                                 Icon(
-                                                    item.icon, contentDescription = null
+                                                    item.icon, contentDescription = null, tint = if (selectMenu == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE)
                                                 )
                                             },
-                                            label = { Text(item.label) },
+                                            label = { Text(item.label, color = if (selectMenu == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE)) },
                                             selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                                             onClick = {
                                                 if (user != null || item.route != Route.PALogin) {
@@ -119,6 +116,7 @@ class MainActivity() : ComponentActivity() {
                                                         restoreState = true
                                                     }
                                                 }
+                                                selectMenu = item.label
                                             })
                                     }
                                 }
@@ -143,14 +141,14 @@ class MainActivity() : ComponentActivity() {
                             composable(Route.PANewPet) { PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
                             composable(
-                                "${Route.PAChangePet}/{petId}",
-                                arguments = listOf(navArgument("petId") {
+                                "${Route.PAChangePet}/{petSelect}",
+                                arguments = listOf(navArgument("petSelect") {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                backStackEntry.arguments?.getString("petId")?.let {
+                                backStackEntry.arguments?.getString("petSelect")?.let {
                                     PAChangePet(
-                                        idPet = it,
+                                        petSelect = it,
                                         navController = navigationController,
                                     )
                                 }

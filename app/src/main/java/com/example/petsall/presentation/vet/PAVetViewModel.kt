@@ -36,6 +36,8 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                                         locationValue.longitude = it.data?.get("Longitud") as Double
                                         event.location.distanceTo(locationValue) < 10000
                                     }
+                                    result.data[0]?.data?.get("specialized_sector")
+                                        ?.let { Log.d("especializaciones", it.toString()) }
                                     state = state.copy(data = filterCoordinates)
                                 }else{
                                     state = state.copy(data = listOf())

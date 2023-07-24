@@ -8,11 +8,11 @@ import javax.inject.Inject
 
 class PAChangePetsUseCase @Inject constructor(private val repository: PAChangePetsRepo) {
 
-    suspend fun getPets(): Flow<Resource<List<DocumentSnapshot?>>> =
+    suspend fun getPets(selelectedPet:String): Flow<Resource<List<*>?>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getDataPets()))
+                emit(Resource.Success(repository.getDataPets(selelectedPet = selelectedPet)))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))
             }

@@ -9,4 +9,5 @@ class PAVetDetailRepoImpl @Inject constructor(private val datasource: PAVetDetai
     override suspend fun getDataFromAddress(address: String): Coordinates = datasource.getCoordinator(address = address)
     override suspend fun getVet(id:String): DocumentSnapshot  = datasource.getVet(id = id)
     override suspend fun registerDate(day: String, time: String, patient: String, reason: String,idVet:String): Boolean = datasource.registerDate(day = day, time = time, patient = patient, reason = reason, idVet = idVet)
+    override suspend fun getDataPets(): List<DocumentSnapshot?> = datasource.getDataPets()
 }

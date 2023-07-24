@@ -282,8 +282,7 @@ fun PAHome(
                                 textAlign = TextAlign.Center, color = Color(0xff84B1B8)
                             )
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-
+                        Spacer(modifier = Modifier.height(50.dp))
                     }
 
                     Row {

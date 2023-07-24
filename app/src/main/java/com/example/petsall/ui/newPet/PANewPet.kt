@@ -24,7 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.petsall.R
 import com.example.petsall.presentation.newpets.PANewPetsEven
 import com.example.petsall.presentation.newpets.PANewPetsViewModel
@@ -48,88 +48,21 @@ import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.theme.BtnBlue
-import com.example.petsall.ui.theme.BtnGreen2
+import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.plata
 import java.util.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltViewModel()) {
-    var state = viewModel.state
-
-    val breedOptions = listOf(
-        "Akita",
-        "Alaskan Malamute",
-        "Basset Hound",
-        "Beagle",
-        "Bernese Mountain Dog",
-        "Bichón Frisé",
-        "Bloodhound",
-        "Boston Terrier",
-        "Boxer",
-        "Bulldog",
-        "Bulldog Francés",
-        "Bulldog Inglés",
-        "Cane Corso",
-        "Carlino",
-        "Chihuahua",
-        "Chin Japonés",
-        "Chow Chow",
-        "Cocker Spaniel",
-        "Collie",
-        "Corgi",
-        "Dachshund",
-        "Dálmata",
-        "Doberman",
-        "Dogo Argentino",
-        "Elkhound Noruego",
-        "Finnish Spitz",
-        "Galgo Italiano",
-        "Golden Retriever",
-        "Gran Danés",
-        "Husky Siberiano",
-        "Jack Russell Terrier",
-        "Keeshond",
-        "Labrador Retriever",
-        "Lhasa Apso",
-        "Maltese",
-        "Mastín",
-        "Mastín Inglés",
-        "Mastín Tibetano",
-        "Old English Sheepdog",
-        "Pastor Alemán",
-        "Pastor Australiano",
-        "Papillón",
-        "Pekingese",
-        "Pitbull",
-        "Pomerania",
-        "Poodle",
-        "Rhodesian Ridgeback",
-        "Rottweiler",
-        "Saluki",
-        "San Bernardo",
-        "Setter Inglés",
-        "Setter Irlandés",
-        "Shiba Inu",
-        "Shih Tzu",
-        "Siberian Husky",
-        "Terranova",
-        "Vizsla",
-        "Weimaraner",
-        "Whippet",
-        "Xoloitzcuintle",
-        "Yorkipoo",
-        "Yorkshire Terrier",
-        "Zuchon"
-    )
+    var selectPet =
+        navController.currentBackStackEntryAsState().value?.savedStateHandle?.get<String>("selectPet")
+            ?: ""
     val birthdate = rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     var selectedPet by rememberSaveable { mutableStateOf("dog") }
-    val expandedState = rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
-
-    var selectedBreed by rememberSaveable { mutableStateOf("") }
     var selectedImage by remember { mutableStateOf<Bitmap?>(null) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -138,12 +71,11 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                 val imageBitmap = loadImageFromUri(uri, context.contentResolver)
                 selectedImage = imageBitmap
             }
-        }
-    )
+        })
 
     val color = Color(Black.value)
     val scrollState = rememberScrollState()
-    val imageList = listOf(
+    val species = listOf(
         "dog" to R.drawable.dog_face,
         "fish" to R.drawable.fish,
         "cat" to R.drawable.cat_face,
@@ -172,29 +104,25 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
             title = {
                 Text(
                     text = "Nuevo registro",
-                    color = Color.White,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    color = Snacbar,
+                    modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End
                 )
             }, navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Atrás",
-                        tint = Color.White
+                        Icons.Default.ArrowBack, contentDescription = "Atrás", tint = Snacbar
                     )
                 }
-            }, backgroundColor = Color(
-                0xff84B1B8
-            )
+            }, backgroundColor = Color.White, elevation = 0.dp
         )
     }, content = {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 60.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 60.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Selecciona tu mascota",
@@ -210,12 +138,15 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         .weight(1f)
                         .padding(top = 5.dp)
                 ) {
-                    imageList.take(2).forEach { (name, resourceId) ->
+                    species.take(2).forEach { (name, resourceId) ->
                         Spacer(modifier = Modifier.height(18.dp))
                         ImageWithSelection(painter = painterResource(id = resourceId),
                             contentDescription = name,
                             isSelected = selectedPet == name,
-                            onClick = { selectedPet = name })
+                            onClick = {
+                                selectedPet = name
+                                selectPet = ""
+                            })
                     }
                 }
                 Spacer(modifier = Modifier.width(40.dp))
@@ -224,12 +155,15 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         .weight(1f)
                         .padding(top = 33.dp)
                 ) {
-                    imageList.takeLast(2).forEach { (name, resourceId) ->
+                    species.takeLast(2).forEach { (name, resourceId) ->
                         Spacer(modifier = Modifier.height(18.dp))
                         ImageWithSelection(painter = painterResource(id = resourceId),
                             contentDescription = name,
                             isSelected = selectedPet == name,
-                            onClick = { selectedPet = name })
+                            onClick = {
+                                selectedPet = name
+                                selectPet = ""
+                            })
                     }
                 }
             }
@@ -240,13 +174,23 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextField(value = selectedBreed,
-                    onValueChange = { selectedBreed = it },
-                    label = { Text("Selecciona una raza") },
+                TextField(value = selectPet,
+                    onValueChange = { selectPet = it },
+                    label = {
+                        Text(
+                            when (selectedPet) {
+                                "dog", "cat" -> "Selecciona una raza"
+                                "fish", "bird" -> "Selecciona una especie"
+                                else -> "Selecciona"
+                            }
+                        )
+                    },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .clickable { expandedState.value = true }
+                        .clickable { //expandedState.value = true
+                            navController.navigate("${Route.PAChangePet}/${selectedPet}")
+                        }
                         .clip(RoundedCornerShape(12.dp))
                         .width(282.dp)
                         .padding(vertical = 5.dp),
@@ -258,30 +202,18 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     ),
                     textStyle = MaterialTheme.typography.body1,
                     trailingIcon = {
-                        IconButton(onClick = { expandedState.value = true }) {
+                        IconButton(onClick = { navController.navigate("${Route.PAChangePet}/${selectedPet}") }) {
                             Icon(
-                                Icons.Filled.ArrowDropDown,
-                                contentDescription = "Expandir opciones"
+                                Icons.Filled.ArrowDropDown, contentDescription = "Expandir opciones"
                             )
                         }
                     },
                     readOnly = true
                 )
 
-                DropdownMenu(expanded = expandedState.value,
-                    onDismissRequest = { expandedState.value = false }) {
-                    breedOptions.forEach { breed ->
-                        DropdownMenuItem(onClick = {
-                            selectedBreed = breed
-                            expandedState.value = false
-                        }) {
-                            Text(text = breed)
-                        }
-                    }
-                }
 
-                OutlinedTextField(
-                    value = birthdate.value,
+                mDatePickerDialog.datePicker.maxDate = mCalendar.timeInMillis
+                OutlinedTextField(value = birthdate.value,
                     onValueChange = { birthdate.value = it },
                     label = { Text("Fecha de nacimiento") },
                     singleLine = true,
@@ -339,35 +271,32 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                             .clip(shape = RoundedCornerShape(50.dp)),
                         contentScale = ContentScale.Crop
                     )
-
                 }
 
-                ClickableText(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                textDecoration = TextDecoration.None,
-                                fontSize = 15.sp,
-                                color = BtnBlue
-                            )
-                        ) {
-                            append("Subir foto de perfil")
-                        }
-                    },
-                    onClick = {
-                        launcher.launch("image/*")
-                    }, modifier = Modifier.padding(vertical = 20.dp)
+                ClickableText(text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            textDecoration = TextDecoration.None,
+                            fontSize = 15.sp,
+                            color = BtnBlue
+                        )
+                    ) {
+                        append("Subir foto de perfil")
+                    }
+                }, onClick = {
+                    launcher.launch("image/*")
+                }, modifier = Modifier.padding(vertical = 20.dp)
                 )
 
                 ButtonDefault(
                     textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp)
                 ) {
-                    if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectedBreed.isNotEmpty() && selectedPet.isNotEmpty()) {
+                    if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectPet.isNotEmpty() && selectedPet.isNotEmpty()) {
                         viewModel.onEvent(
                             PANewPetsEven.Register(
                                 name = name,
                                 birthday = birthdate.value,
-                                breeds = selectedBreed,
+                                breeds = selectPet,
                                 pets = selectedPet,
                                 img = selectedImage
                             )
@@ -408,8 +337,6 @@ fun ImageWithSelection(
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center
     )
-
-
 }
 
 fun loadImageFromUri(uri: Uri, contentResolver: ContentResolver): Bitmap? {
