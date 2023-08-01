@@ -2,6 +2,7 @@ package com.example.petsall.ui.vetdetail
 
 import android.annotation.SuppressLint
 import android.location.Location
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.petsall.presentation.vetdetail.PAVetDetailEvent
@@ -33,12 +34,9 @@ import com.example.petsall.ui.components.CardDateOfPet
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.theme.Black
-import com.example.petsall.ui.theme.BtnBlue
 import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.plata
-import com.example.petsall.utils.checkLocationPermission
-import com.example.petsall.utils.datePicker
-import com.example.petsall.utils.generateAvailableTimes
+import com.example.petsall.utils.*
 import com.google.accompanist.permissions.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -47,6 +45,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
+import com.google.firebase.Timestamp
 import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -84,6 +83,7 @@ fun PAVetDetail(
     mYear = mCalendar.get(Calendar.YEAR)
     mCalendar.time = Date()
 
+
     val mDatePickerDialog = datePicker(date = date, context = context, focusManager = focusManager)
     val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -104,6 +104,8 @@ fun PAVetDetail(
         }
     }
 
+
+
     if (!state.dataVet.isNullOrEmpty() && checkLocationPermission(context)) {
         val businessLocation = LatLng(
             state.dataVet?.get("Latitud") as Double, state.dataVet?.get("Longitud") as Double
@@ -122,9 +124,7 @@ fun PAVetDetail(
             LatLngBounds.Builder().include(businessLocation).include(it).build()
         }
 
-        val availableTimes = generateAvailableTimes(
-            state.dataVet?.get("HInicio").toString(), state.dataVet?.get("HFin").toString()
-        )
+
 
         Scaffold(topBar = {
             TopAppBar(title = {
@@ -157,7 +157,6 @@ fun PAVetDetail(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(BtnBlue)
                             .wrapContentWidth(unbounded = false)
                             .wrapContentHeight(unbounded = true)
                     ) {
@@ -178,7 +177,27 @@ fun PAVetDetail(
                                         .height(20.dp)
                                         .background(Color.White)
                                 )
-                                OutlinedTextField(value = date.value,
+
+                                Text(
+                                    text = "Selecciona al paciente",
+                                    modifier = Modifier.padding(vertical = 5.dp)
+                                )
+                                LazyRow(
+                                    contentPadding = PaddingValues(
+                                        horizontal = 40.dp, vertical = 8.dp
+                                    ), horizontalArrangement = Arrangement.spacedBy(15.dp)
+                                ) {
+                                    items(state.dataPets) { item ->
+                                        CardDateOfPet(data = item?.data,
+                                            "",
+                                            isSelected = selectedImage == item?.id.toString(),
+                                            onClick = { selectedImage = item?.id.toString() })
+                                    }
+
+                                }
+
+                                OutlinedTextField(
+                                    value = date.value,
                                     onValueChange = { date.value = it },
                                     label = { Text("Fecha de la cita") },
                                     singleLine = true,
@@ -208,65 +227,6 @@ fun PAVetDetail(
                                     readOnly = true,
                                     enabled = false
                                 )
-
-                                OutlinedTextField(value = selectedTime,
-                                    onValueChange = { selectedTime = it },
-                                    label = { Text("Selecciona un horario") },
-                                    singleLine = true,
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .width(282.dp)
-                                        .padding(vertical = 5.dp),
-                                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = plata,
-                                        unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
-                                            alpha = 0.15f
-                                        ),
-                                        textColor = color,
-                                        focusedLabelColor = color
-                                    ),
-                                    textStyle = MaterialTheme.typography.body1,
-                                    trailingIcon = {
-                                        IconButton(onClick = { expandedState.value = true }) {
-                                            Icon(
-                                                Icons.Filled.ArrowDropDown,
-                                                contentDescription = "Expandir opciones"
-                                            )
-                                        }
-                                    },
-                                    readOnly = true,
-                                    enabled = false
-                                )
-                                DropdownMenu(expanded = expandedState.value,
-                                    onDismissRequest = { expandedState.value = false }) {
-                                    availableTimes.forEach { times ->
-                                        DropdownMenuItem(onClick = {
-                                            selectedTime = times
-                                            expandedState.value = false
-                                        }) {
-                                            Text(text = times)
-                                        }
-                                    }
-                                }
-
-                                Text(
-                                    text = "Selecciona al paciente",
-                                    modifier = Modifier.padding(vertical = 5.dp)
-                                )
-                                LazyRow(
-                                    contentPadding = PaddingValues(
-                                        horizontal = 40.dp, vertical = 8.dp
-                                    ), horizontalArrangement = Arrangement.spacedBy(15.dp)
-                                ) {
-                                    items(state.dataPets) { item ->
-                                        CardDateOfPet(data = item?.data,
-                                            "",
-                                            isSelected = selectedImage == item?.id.toString(),
-                                            onClick = { selectedImage = item?.id.toString() })
-                                    }
-
-                                }
 
                                 OutlinedTextField(
                                     value = selectedProblem,
@@ -311,6 +271,52 @@ fun PAVetDetail(
                                         }
                                     }
                                 }
+                                if (date.value.isNotEmpty()){
+                                    OutlinedTextField(
+                                        value = selectedTime,
+                                        onValueChange = { selectedTime = it },
+                                        label = { Text("Selecciona un horario") },
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(12.dp),
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .width(282.dp)
+                                            .padding(vertical = 5.dp),
+                                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                                            focusedBorderColor = plata,
+                                            unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
+                                                alpha = 0.15f
+                                            ),
+                                            textColor = color,
+                                            focusedLabelColor = color
+                                        ),
+                                        textStyle = MaterialTheme.typography.body1,
+                                        trailingIcon = {
+                                            IconButton(onClick = { expandedState.value = true }) {
+                                                Icon(
+                                                    Icons.Filled.ArrowDropDown,
+                                                    contentDescription = "Expandir opciones"
+                                                )
+                                            }
+                                        },
+                                        readOnly = true,
+                                        enabled = false
+                                    )
+                                    DropdownMenu(expanded = expandedState.value,
+                                        onDismissRequest = { expandedState.value = false }) {
+                                        val availableTimes = generateAvailableTimes(dateString = date.value,
+                                            state.dataVet?.get("HInicio").toString(), state.dataVet?.get("HFin").toString()
+                                        )
+                                        availableTimes.forEach { times ->
+                                            DropdownMenuItem(onClick = {
+                                                selectedTime = times
+                                                expandedState.value = false
+                                            }) {
+                                                Text(text = times)
+                                            }
+                                        }
+                                    }
+                                }
 
                             }
                             Card(
@@ -328,16 +334,19 @@ fun PAVetDetail(
                                         enabled = !enableButton,
                                         textButton = "Solicitar cita",
                                         onClick = {
-                                            viewModel.onEvent(
-                                                PAVetDetailEvent.RegisterDate(
-                                                    day = date.value,
-                                                    time = selectedTime,
-                                                    patient = selectedImage,
-                                                    reason = selectedProblem,
-                                                    idVet = vetDetail
+                                            if (date.value.isNotEmpty() && selectedTime.isNotEmpty() && selectedProblem.isNotEmpty()) {
+                                                val timestamp = convertDateTimeToTimestamp(dateString = date.value, timeString = selectedTime.split(" ")[0])
+                                                viewModel.onEvent(
+                                                    PAVetDetailEvent.RegisterDate(
+                                                        day = timestamp,
+                                                        time = selectedTime,
+                                                        patient = selectedImage,
+                                                        reason = selectedProblem,
+                                                        idVet = vetDetail
+                                                    )
                                                 )
-                                            )
-                                            coroutine.launch { sheetState.hide() }
+                                                coroutine.launch { sheetState.hide() }
+                                            }
                                         })
                                 }
                             }
@@ -349,6 +358,17 @@ fun PAVetDetail(
                         .fillMaxSize()
                         .padding(horizontal = 20.dp)
                 ) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+
+                        ButtonDefault(
+                            textButton = "Solicitar cita",
+                            modifier = Modifier.padding(horizontal = 40.dp)
+                        ) {
+
+                        }
+                    }
+                    Text(text = "Especialidades", fontSize = 14.sp)
+                    Text(text = "Ubicacion", fontSize = 14.sp)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

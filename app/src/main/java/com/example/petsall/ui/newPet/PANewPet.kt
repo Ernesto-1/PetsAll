@@ -50,6 +50,7 @@ import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.theme.BtnBlue
 import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.plata
+import com.example.petsall.utils.convertStringToTimestamp
 import java.util.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -292,10 +293,11 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp)
                 ) {
                     if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectPet.isNotEmpty() && selectedPet.isNotEmpty()) {
+                        val timestamp = convertStringToTimestamp(birthdate.value)
                         viewModel.onEvent(
                             PANewPetsEven.Register(
                                 name = name,
-                                birthday = birthdate.value,
+                                birthday = timestamp,
                                 breeds = selectPet,
                                 pets = selectedPet,
                                 img = selectedImage

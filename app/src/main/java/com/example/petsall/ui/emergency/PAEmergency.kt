@@ -50,7 +50,6 @@ fun PAEmergency(viewModel: PAEmergencyViewModel = hiltViewModel()) {
         }
     }
 
-
     if (checkLocationPermission(context)) {
         if (!state.data?.data.isNullOrEmpty() && checkLocationPermission(context)) {
 

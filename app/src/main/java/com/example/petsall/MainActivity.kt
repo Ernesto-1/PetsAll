@@ -1,32 +1,26 @@
 package com.example.petsall
 
-import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -35,11 +29,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import coil.compose.AsyncImage
-import com.example.petsall.presentation.home.PAHomeEvent
-import com.example.petsall.presentation.home.PAHomeViewModel
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
+import com.example.petsall.ui.explore.PAExplore
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.login.PALogin
@@ -48,12 +40,13 @@ import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.newPet.PANewPet
 import com.example.petsall.ui.perfil.PAPerfil
 import com.example.petsall.ui.signup.PASignUp
+import com.example.petsall.ui.vaccination.PAVaccination
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
+import com.example.petsall.utils.BottomMenuViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
@@ -79,23 +72,28 @@ class MainActivity() : ComponentActivity() {
                 val navigationController = rememberNavController()
                 val user = Firebase.auth.currentUser
                 var selectMenu by rememberSaveable { mutableStateOf("Inicio") }
+
                 val items = listOf(
                     Menu(Route.PAHome, Icons.Filled.Home, "Inicio"),
                     Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
                     Menu(Route.PAEmergency, Icons.Filled.Warning, "Emergencia"),
+                    Menu(Route.PAExplore, ImageVector.vectorResource(id = R.drawable.explore), "Explora"),
                     Menu(Route.PAPerfil, Icons.Filled.Person, "Perfil"),
                 )
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
                     Scaffold(bottomBar = {
+
                             val navBackStackEntry by navigationController.currentBackStackEntryAsState()
                             val currentDestination = navBackStackEntry?.destination
                             if (currentDestination?.route in listOf(
-                                    Route.PAHome, Route.PAEmergency, Route.PAVet, Route.PAPerfil
-
+                                    Route.PAHome, Route.PAEmergency, Route.PAVet, Route.PAPerfil,Route.PAExplore
                                 )
                             ) {
+                                if (currentDestination?.route == Route.PAHome){
+                                    selectMenu = "Inicio"
+                                }
                                 BottomNavigation {
                                     items.forEach { item ->
                                         BottomNavigationItem(modifier = Modifier.background(Color.White),
@@ -104,7 +102,7 @@ class MainActivity() : ComponentActivity() {
                                                     item.icon, contentDescription = null, tint = if (selectMenu == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE)
                                                 )
                                             },
-                                            label = { Text(item.label, color = if (selectMenu == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE)) },
+                                            label = { Text(item.label, color = if (selectMenu  == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE), fontSize = 10.sp) },
                                             selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                                             onClick = {
                                                 if (user != null || item.route != Route.PALogin) {
@@ -120,6 +118,7 @@ class MainActivity() : ComponentActivity() {
                                             })
                                     }
                                 }
+
                             }
                         }) { innerPadding ->
                         NavHost(
@@ -138,6 +137,21 @@ class MainActivity() : ComponentActivity() {
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
                             composable(Route.PAEmergency) { PAEmergency() }
+                            composable(Route.PAExplore) { PAExplore() }
+                            composable(
+                                "${Route.PAVaccinationCard}/{idUser}/{idPet}",
+                                arguments = listOf(navArgument("idUser") {
+                                    type = NavType.StringType
+                                }, navArgument("idPet"){
+                                    type = NavType.StringType
+                                }
+                                )
+                            ){ backStackEntry ->
+                                    PAVaccination(
+                                        idUser =  backStackEntry.arguments?.getString("idUser") ?: "",
+                                        idPet = backStackEntry.arguments?.getString("idPet") ?: "",
+                                        navController = navigationController)
+                            }
                             composable(Route.PANewPet) { PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
                             composable(

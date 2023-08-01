@@ -2,6 +2,7 @@ package com.example.petsall.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.*
@@ -39,7 +40,12 @@ import com.example.petsall.ui.components.PACard2
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.utils.checkLocationPermission
+import com.example.petsall.utils.convertTimestampToString
+import com.example.petsall.utils.convertTimestampToString2
 import com.example.petsall.utils.permissions
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -53,10 +59,10 @@ fun PAHome(
 ) {
     val state = viewModel.state
     val context = LocalContext.current
+    val user = Firebase.auth.currentUser
     var selectPet by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    val sheetState =
-        rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val sharedPreferences = context.getSharedPreferences("nombre_pref", Context.MODE_PRIVATE)
     val valor = sharedPreferences.getString("idPet", "")
 
@@ -78,7 +84,7 @@ fun PAHome(
 
     if (state.data?.isNotEmpty() == true && state.dataPets.isNotEmpty()) {
         val name by rememberSaveable { mutableStateOf(state.data?.get("Nombre")) }
-
+        state.dataPet?.data?.get("Fecha_Nacimiento")?.let { Log.d("FechaNacimientoPet", it.toString() ) }
         LaunchedEffect(selectPet) {
             viewModel.onEvent(PAHomeEvent.GetDataPets(selectPet))
             viewModel.onEvent(PAHomeEvent.GetDatePet(selectPet))
@@ -94,12 +100,9 @@ fun PAHome(
                 title = {
                     Column(verticalArrangement = Arrangement.Center) {
                         Row {
-                            if (state.dataPet?.data?.get("ImgUrl")
-                                    .toString() != ""
-                            ) {
+                            if (state.dataPet?.data?.get("ImgUrl").toString() != "") {
                                 AsyncImage(
-                                    model = state.dataPet?.data?.get("ImgUrl")
-                                        .toString(),
+                                    model = state.dataPet?.data?.get("ImgUrl").toString(),
                                     contentDescription = "Translated description of what the image contains",
                                     modifier = Modifier
                                         .height(50.dp)
@@ -120,8 +123,7 @@ fun PAHome(
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                text = state.dataPet?.data?.get("Nombre")
-                                    .toString(),
+                                text = state.dataPet?.data?.get("Nombre").toString(),
                                 modifier = Modifier.align(
                                     Alignment.CenterVertically
                                 ),
@@ -138,12 +140,11 @@ fun PAHome(
                                         scope.launch {
                                             sheetState.show()
                                         }
-                                    })
+                                    }
+                            )
                         }
 
                     }
-
-
                 },
                 backgroundColor = Color.White,
                 elevation = 0.dp,
@@ -204,8 +205,7 @@ fun PAHome(
                                                         modifier = Modifier
                                                             .weight(2f)
                                                             .padding(
-                                                                vertical = 10.dp,
-                                                                horizontal = 15.dp
+                                                                vertical = 10.dp, horizontal = 15.dp
                                                             ),
                                                         verticalAlignment = Alignment.CenterVertically
                                                     ) {
@@ -255,31 +255,30 @@ fun PAHome(
                     Spacer(modifier = Modifier.height(50.dp))
 
                     if (state.datePet.isNotEmpty()) {
-                        if (state.datePet[0]?.data?.get("status").toString() == "earring") {
+                        val datePet = convertTimestampToString2(state.datePet[0]?.data?.get("day") as Timestamp)
+                        if (state.datePet[0]?.data?.get("status").toString() == "pendiente") {
                             Text(
                                 text = "Tienes una cita pendiente de ser confirmada por la clinica",
                                 fontSize = 20.sp,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 77.dp),
-                                textAlign = TextAlign.Center, color = Color(0xff84B1B8)
+                                textAlign = TextAlign.Center,
+                                color = Color(0xff84B1B8)
                             )
                         } else if (state.datePet[0]?.data?.get("status")
-                                .toString() == "confirmed"
+                                .toString() == "confirmado"
                         ) {
                             Text(
                                 text = "${
                                     state.dataPet?.data?.get("Nombre").toString()
-                                } tiene una cita el ${
-                                    state.datePet[0]?.data?.get("day").toString()
-                                } en horario de ${
-                                    state.datePet[0]?.data?.get("time")?.toString()
-                                }",
+                                } tiene una cita el $datePet ",
                                 fontSize = 20.sp,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 77.dp),
-                                textAlign = TextAlign.Center, color = Color(0xff84B1B8)
+                                textAlign = TextAlign.Center,
+                                color = Color(0xff84B1B8)
                             )
                         }
                         Spacer(modifier = Modifier.height(50.dp))
@@ -289,14 +288,18 @@ fun PAHome(
                         PACard2(
                             iconCard = R.drawable.healt,
                             txtCard = "Cartilla de vacunacion",
-                            colorIcon = Color(0xFF99F1A7), modifier = Modifier.weight(1f)
-                        )
+                            colorIcon = Color(0xFF99F1A7),
+                            modifier = Modifier.weight(1f)
+                        ){
+                            navController.navigate("${Route.PAVaccinationCard}/${user?.uid.toString()}/${state.dataPet?.id}")
+                        }
                         Spacer(modifier = Modifier.width(10.dp))
 
                         PACard2(
                             iconCard = R.drawable.proceedings,
                             txtCard = "Expediente",
-                            colorIcon = Color(0xff78CEFF), modifier = Modifier.weight(1f)
+                            colorIcon = Color(0xff78CEFF),
+                            modifier = Modifier.weight(1f)
                         )
                     }
 

@@ -19,7 +19,7 @@ class PAHomeDatasource @Inject constructor(private val firebaseAuth: FirebaseAut
     }
 
     suspend fun getDatePet(idPet: String): List<DocumentSnapshot?> {
-        val datePet = firebaseFirestore.collection("Citas").whereIn("status", listOf("earring", "confirmed"))
+        val datePet = firebaseFirestore.collection("Citas").whereIn("status", listOf("pendiente", "confirmado"))
             .whereEqualTo("patient", idPet).get().await()
         return datePet.documents
     }

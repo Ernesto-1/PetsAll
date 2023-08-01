@@ -3,6 +3,7 @@ package com.example.petsall.data.remote.vetdetail
 import android.util.Log
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.domain.WebService
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,7 +26,7 @@ class PAVetDetailDataSource @Inject constructor(
     }
 
     suspend fun registerDate(
-        day: String,
+        day: Timestamp?,
         time: String,
         patient: String,
         reason: String,
@@ -37,8 +38,7 @@ class PAVetDetailDataSource @Inject constructor(
                 .whereEqualTo("patient", patient).get().await()
 
         val date = hashMapOf(
-            "day" to day,
-            "time" to time,
+            "date" to day,
             "patient" to patient,
             "reason" to reason,
             "status" to "earring",

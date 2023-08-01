@@ -14,6 +14,8 @@ import com.example.petsall.domain.newpets.PANewPetsRepo
 import com.example.petsall.domain.newpets.PANewPetsRepoImpl
 import com.example.petsall.domain.signup.PASignUpRepo
 import com.example.petsall.domain.signup.PASignUpRepoImpl
+import com.example.petsall.domain.vaccination.PAVaccinationRepo
+import com.example.petsall.domain.vaccination.PAVaccinationRepoImpl
 import com.example.petsall.domain.vet.PAVetRepo
 import com.example.petsall.domain.vet.PAVetRepoImpl
 import com.example.petsall.domain.vetdetail.PAVetDetailRepo
@@ -55,6 +57,8 @@ abstract class AppModule {
     abstract fun providesVetDetailsRepository(repoVetDetail: PAVetDetailRepoImpl): PAVetDetailRepo
     @Binds
     abstract fun providesEmergencyRepository(repoEmergency: PAEmergencyRepoImpl): PAEmergencyRepo
+    @Binds
+    abstract fun providesVaccinationRepository(repoVaccination: PAVaccinationRepoImpl): PAVaccinationRepo
 
     companion object {
 

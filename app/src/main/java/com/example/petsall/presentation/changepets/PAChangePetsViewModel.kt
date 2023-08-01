@@ -1,6 +1,5 @@
 package com.example.petsall.presentation.changepets
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -37,10 +36,10 @@ class PAChangePetsViewModel @Inject constructor(private val useCase: PAChangePet
         }
     }
     fun searchQuery(query: String){
-        if (query.isNotEmpty()){
-            state = state.copy(dataPetsSearch = state.dataPets?.filter { it.toString().contains(query,ignoreCase = true)})
+        state = if (query.isNotEmpty()){
+            state.copy(dataPetsSearch = state.dataPets?.filter { it.toString().contains(query,ignoreCase = true)})
         }else{
-            state = state.copy(dataPetsSearch = state.dataPets)
+            state.copy(dataPetsSearch = state.dataPets)
         }
     }
 }

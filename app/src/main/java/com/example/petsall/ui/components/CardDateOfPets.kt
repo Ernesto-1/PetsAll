@@ -41,8 +41,8 @@ fun CardDateOfPet(data: Map<String, Any>? = mapOf(), id: String = "" ,isSelected
                             model = data["ImgUrl"].toString(),
                             contentDescription = "imageFromUrl",
                             modifier = Modifier
-                                .height(100.dp)
-                                .width(100.dp),
+                                .height(80.dp)
+                                .width(80.dp),
                             contentScale = ContentScale.Crop
                         )
                     }else{
@@ -50,8 +50,8 @@ fun CardDateOfPet(data: Map<String, Any>? = mapOf(), id: String = "" ,isSelected
                             painter = painterResource(id = R.drawable.fish),
                             contentDescription = "ImageLocal",
                             modifier = Modifier
-                                .height(100.dp)
-                                .width(100.dp) ,
+                                .height(80.dp)
+                                .width(80.dp) ,
                             contentScale = ContentScale.Fit
                         )
                     }

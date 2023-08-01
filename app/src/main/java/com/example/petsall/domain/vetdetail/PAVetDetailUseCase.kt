@@ -2,6 +2,7 @@ package com.example.petsall.domain.vetdetail
 
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.utils.Resource
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +31,7 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
             }
         }
 
-    suspend fun registerDate(day: String, time: String, patient: String, reason: String,idVet:String): Flow<Resource<Boolean?>> =
+    suspend fun registerDate(day: Timestamp?, time: String, patient: String, reason: String, idVet:String): Flow<Resource<Boolean?>> =
         flow {
             emit(Resource.Loading())
             try {
