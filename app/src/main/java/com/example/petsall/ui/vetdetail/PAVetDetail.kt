@@ -2,8 +2,10 @@ package com.example.petsall.ui.vetdetail
 
 import android.annotation.SuppressLint
 import android.location.Location
-import android.util.Log
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,33 +23,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.petsall.R
 import com.example.petsall.presentation.vetdetail.PAVetDetailEvent
 import com.example.petsall.presentation.vetdetail.PAVetDetailViewModel
+import com.example.petsall.ui.components.CarouselOfImages
 import com.example.petsall.ui.components.CardDateOfPet
+import com.example.petsall.ui.components.MyMap
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
+import com.example.petsall.ui.components.listSpecialized
 import com.example.petsall.ui.login.ButtonDefault
-import com.example.petsall.ui.theme.Black
-import com.example.petsall.ui.theme.Snacbar
-import com.example.petsall.ui.theme.plata
+import com.example.petsall.ui.theme.*
 import com.example.petsall.utils.*
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
-import com.google.firebase.Timestamp
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -64,19 +72,12 @@ fun PAVetDetail(
     var selectedProblem by rememberSaveable { mutableStateOf("") }
     var selectedImage by rememberSaveable { mutableStateOf("") }
     val state = viewModel.state
-    val uiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(
-                myLocationButtonEnabled = true, zoomControlsEnabled = false
-            )
-        )
-    }
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     var location by remember { mutableStateOf<Location?>(null) }
     val enableButton = false
-    val color = Color(Black.value)
+    val color = Color.Black
     val focusManager = LocalFocusManager.current
     val mYear: Int
     val mCalendar = Calendar.getInstance()
@@ -85,8 +86,7 @@ fun PAVetDetail(
 
 
     val mDatePickerDialog = datePicker(date = date, context = context, focusManager = focusManager)
-    val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
+    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     BackHandler {
         navController.navigateUp()
@@ -95,6 +95,7 @@ fun PAVetDetail(
     LaunchedEffect(Unit) {
         if (vetDetail.isNotEmpty()) {
             viewModel.onEvent(PAVetDetailEvent.GetVet(vetDetail))
+            viewModel.onEvent(PAVetDetailEvent.GetDataPets(""))
         }
 
         if (checkLocationPermission(context)) {
@@ -107,24 +108,6 @@ fun PAVetDetail(
 
 
     if (!state.dataVet.isNullOrEmpty() && checkLocationPermission(context)) {
-        val businessLocation = LatLng(
-            state.dataVet?.get("Latitud") as Double, state.dataVet?.get("Longitud") as Double
-        )
-        val myLocation = location?.latitude?.let {
-            location?.longitude?.let { it1 ->
-                LatLng(
-                    it, it1
-                )
-            }
-        }
-        val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(businessLocation, 15f)
-        }
-        val totalLocation = myLocation?.let {
-            LatLngBounds.Builder().include(businessLocation).include(it).build()
-        }
-
-
 
         Scaffold(topBar = {
             TopAppBar(title = {
@@ -271,7 +254,12 @@ fun PAVetDetail(
                                         }
                                     }
                                 }
-                                if (date.value.isNotEmpty()){
+                                if (date.value.isNotEmpty()) {
+                                    val availableTimes = generateAvailableTimes(
+                                        dateString = date.value,
+                                        state.dataVet?.get("HInicio").toString(),
+                                        state.dataVet?.get("HFin").toString()
+                                    )
                                     OutlinedTextField(
                                         value = selectedTime,
                                         onValueChange = { selectedTime = it },
@@ -292,7 +280,17 @@ fun PAVetDetail(
                                         ),
                                         textStyle = MaterialTheme.typography.body1,
                                         trailingIcon = {
-                                            IconButton(onClick = { expandedState.value = true }) {
+                                            IconButton(onClick = {
+                                                if (availableTimes.isNotEmpty()) {
+                                                    expandedState.value = true
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "No hay citas disponibles intenta con otro dia",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                            }) {
                                                 Icon(
                                                     Icons.Filled.ArrowDropDown,
                                                     contentDescription = "Expandir opciones"
@@ -304,17 +302,23 @@ fun PAVetDetail(
                                     )
                                     DropdownMenu(expanded = expandedState.value,
                                         onDismissRequest = { expandedState.value = false }) {
-                                        val availableTimes = generateAvailableTimes(dateString = date.value,
-                                            state.dataVet?.get("HInicio").toString(), state.dataVet?.get("HFin").toString()
-                                        )
-                                        availableTimes.forEach { times ->
-                                            DropdownMenuItem(onClick = {
-                                                selectedTime = times
-                                                expandedState.value = false
-                                            }) {
-                                                Text(text = times)
+                                        if (availableTimes.isNotEmpty()) {
+                                            availableTimes.forEach { times ->
+                                                DropdownMenuItem(onClick = {
+                                                    selectedTime = times
+                                                    expandedState.value = false
+                                                }) {
+                                                    Text(text = times)
+                                                }
                                             }
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "No hay citas disponibles intenta con otro dia",
+                                                Toast.LENGTH_LONG
+                                            ).show()
                                         }
+
                                     }
                                 }
 
@@ -331,11 +335,14 @@ fun PAVetDetail(
                                         .align(alignment = Alignment.Center)
                                         .height(48.dp)
                                         .width(216.dp),
-                                        enabled = !enableButton,
+                                        enabled = !enableButton, radius = 16.dp,
                                         textButton = "Solicitar cita",
                                         onClick = {
                                             if (date.value.isNotEmpty() && selectedTime.isNotEmpty() && selectedProblem.isNotEmpty()) {
-                                                val timestamp = convertDateTimeToTimestamp(dateString = date.value, timeString = selectedTime.split(" ")[0])
+                                                val timestamp = convertDateTimeToTimestamp(
+                                                    dateString = date.value,
+                                                    timeString = selectedTime.split(" ")[0]
+                                                )
                                                 viewModel.onEvent(
                                                     PAVetDetailEvent.RegisterDate(
                                                         day = timestamp,
@@ -357,53 +364,79 @@ fun PAVetDetail(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 20.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 25.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher_background),
+                            contentDescription = "Image",
+                            modifier = Modifier
+                                .height(110.dp)
+                                .width(110.dp)
+                                .clip(shape = RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.FillWidth
+                        )
 
                         ButtonDefault(
                             textButton = "Solicitar cita",
-                            modifier = Modifier.padding(horizontal = 40.dp)
+                            modifier = Modifier.padding(top = 25.dp, bottom = 18.dp), radius = 12.dp
                         ) {
+                            coroutine.launch {
+                                sheetState.show()
+                            }
+                        }
+                    }
+                    val images = listOf(
+                        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg",
+                    )
+                    Text(
+                        text = "Consultorio",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Purple200
+                    )
 
-                        }
-                    }
-                    Text(text = "Especialidades", fontSize = 14.sp)
-                    Text(text = "Ubicacion", fontSize = 14.sp)
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(220.dp)
-                            .background(Color.White)
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
-                        elevation = 5.dp
+                        modifier = Modifier.padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
                     ) {
-                        GoogleMap(
-                            modifier = Modifier.fillMaxSize(),
-                            cameraPositionState = cameraPositionState,
-                            uiSettings = uiSettings,
-                            properties = MapProperties(
-                                isMyLocationEnabled = true,
-                                minZoomPreference = 14.5f,
-                                maxZoomPreference = 16.0f,
-                                latLngBoundsForCameraTarget = totalLocation
+                        CarouselOfImages(
+                            itemsCount = images.size,
+                            itemContent = { index ->
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(images[index])
+                                        .build(),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.height(200.dp)
+                                )
+                            }
+                        )
+                    }
+
+                    listSpecialized(state.dataVet?.get("medical_specialties") as List<*>?)
+
+                    Text(
+                        text = "Ubicacion",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Purple200, modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                    if (location?.isComplete == true ){
+                        location?.let { it1 ->
+                            MyMap(modifier = Modifier.height(220.dp), positionLtLn = LatLng(
+                                state.dataVet?.get("Latitud") as Double, state.dataVet?.get("Longitud") as Double
+                            ), location = it1, nameBussines = state.dataVet!!["Nombre"].toString()
                             )
-                        ) {
-                            Marker(
-                                state = MarkerState(position = businessLocation),
-                                title = "Singapore",
-                                snippet = "Marker in Singapore",
-                            )
-                            MapProperties(isMyLocationEnabled = true, isTrafficEnabled = true)
                         }
                     }
-                    Button(onClick = {
-                        coroutine.launch {
-                            sheetState.show()
-                            viewModel.onEvent(PAVetDetailEvent.GetDataPets(""))
-                        }
-                    }) {
-                    }
+                    Spacer(modifier = Modifier.height(25.dp))
                 }
             }
         })

@@ -3,12 +3,13 @@ package com.example.petsall.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Purple200 = Color(0xFFB59BCF)
-val Purple500 = Color(0xFF6200EE)
+val Purple500 = Color(0xff82649E)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 val BackGroud = Color(0xFF999999)
 val Snacbar = Color(0xFFBBBBBB)
-val Black = Color(0xFF000000)
+val RedAlert = Color(0xFFB63636)
+val Black = Color(0xFFB63636)
 val Check = Color(0xFF0CAD00)
 val RoundedTxt = Color(0xFFE7E7E7)
 val White = Color(0xFFFFFFFF)

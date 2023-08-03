@@ -2,9 +2,12 @@ package com.example.petsall.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -21,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,17 +40,18 @@ import com.example.petsall.R
 import com.example.petsall.presentation.home.PAHomeEvent
 import com.example.petsall.presentation.home.PAHomeViewModel
 import com.example.petsall.ui.changepet.CardChangePet
+import com.example.petsall.ui.components.DismissBackground
 import com.example.petsall.ui.components.PACard
 import com.example.petsall.ui.components.PACard2
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.utils.checkLocationPermission
-import com.example.petsall.utils.convertTimestampToString
 import com.example.petsall.utils.convertTimestampToString2
 import com.example.petsall.utils.permissions
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -84,15 +90,26 @@ fun PAHome(
 
     if (state.data?.isNotEmpty() == true && state.dataPets.isNotEmpty()) {
         val name by rememberSaveable { mutableStateOf(state.data?.get("Nombre")) }
-        state.dataPet?.data?.get("Fecha_Nacimiento")?.let { Log.d("FechaNacimientoPet", it.toString() ) }
         LaunchedEffect(selectPet) {
-            viewModel.onEvent(PAHomeEvent.GetDataPets(selectPet))
+            if (selectPet.isNotEmpty()){
+                state.dataPet = state.dataPets.first{ it?.id == selectPet }
+            }else{
+                state.dataPet = state.dataPets.first()
+                selectPet = state.dataPet?.id.toString()
+            }
             viewModel.onEvent(PAHomeEvent.GetDatePet(selectPet))
         }
 
         BackHandler {
             activity.moveTaskToBack(true)
-            //activity.finish()
+        }
+        if (state.isPetDelete == true) {
+            Toast.makeText(
+                context,
+                "Se elimino exitosamente de tu lista",
+                Toast.LENGTH_SHORT
+            ).show()
+            state.isPetDelete = false
         }
 
         Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
@@ -103,7 +120,7 @@ fun PAHome(
                             if (state.dataPet?.data?.get("ImgUrl").toString() != "") {
                                 AsyncImage(
                                     model = state.dataPet?.data?.get("ImgUrl").toString(),
-                                    contentDescription = "Translated description of what the image contains",
+                                    contentDescription = "Img pet",
                                     modifier = Modifier
                                         .height(50.dp)
                                         .width(50.dp)
@@ -140,8 +157,7 @@ fun PAHome(
                                         scope.launch {
                                             sheetState.show()
                                         }
-                                    }
-                            )
+                                    })
                         }
 
                     }
@@ -176,18 +192,60 @@ fun PAHome(
                             ) {
                                 if (state.dataPets.isNotEmpty()) {
                                     LazyColumn {
-                                        items(state.dataPets) { item ->
-                                            CardChangePet(data = item?.data,
-                                                "",
-                                                isSelected = selectPet == item?.id.toString(),
-                                                onClick = {
-                                                    scope.launch {
-                                                        selectPet = item?.id.toString()
-                                                        sharedPreferences.edit()
-                                                            .putString("idPet", selectPet).apply()
-                                                        sheetState.hide()
+                                        items(items = state.dataPets) { item ->
+                                            var show by remember { mutableStateOf(true) }
+                                            val dismissState = rememberDismissState(
+                                                confirmStateChange = {
+                                                    if (it == DismissValue.DismissedToEnd) {
+                                                        show = false
+                                                        true
+                                                    } else false
+                                                }
+                                            )
+                                            AnimatedVisibility(
+                                                show, exit = fadeOut(spring())
+                                            ) {
+                                                SwipeToDismiss(
+                                                    state = dismissState,
+                                                    modifier = Modifier,
+                                                    background = {
+                                                        DismissBackground(dismissState)
+                                                    },
+                                                    dismissContent = {
+                                                        CardChangePet(data = item?.data,
+                                                            "",
+                                                            isSelected = selectPet == item?.id.toString(),
+                                                            onClick = {
+                                                                scope.launch {
+                                                                    selectPet = item?.id.toString()
+                                                                    sharedPreferences.edit()
+                                                                        .putString(
+                                                                            "idPet",
+                                                                            selectPet
+                                                                        ).apply()
+                                                                    sheetState.hide()
+                                                                }
+                                                            })
                                                     }
-                                                })
+                                                )
+                                            }
+
+                                            LaunchedEffect(show) {
+                                                if (!show) {
+                                                    delay(800)
+                                                    selectPet = ""
+                                                    sharedPreferences.edit()
+                                                        .putString(
+                                                            "idPet",
+                                                            ""
+                                                        ).apply()
+                                                    viewModel.onEvent(PAHomeEvent.DeleteDatePet(item?.id.toString()))
+                                                    sheetState.hide()
+                                                    viewModel.onEvent(PAHomeEvent.GetDataPets(""))
+
+                                                }
+                                            }
+
                                         }
                                         item {
                                             if (state.numPets) {
@@ -196,6 +254,9 @@ fun PAHome(
                                                         .fillMaxWidth()
                                                         .clickable(onClick = {
                                                             navController.navigate(Route.PANewPet)
+                                                            scope.launch {
+                                                                sheetState.hide()
+                                                            }
                                                         })
                                                         .wrapContentHeight(),
                                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -255,7 +316,8 @@ fun PAHome(
                     Spacer(modifier = Modifier.height(50.dp))
 
                     if (state.datePet.isNotEmpty()) {
-                        val datePet = convertTimestampToString2(state.datePet[0]?.data?.get("day") as Timestamp)
+                        val datePet =
+                            convertTimestampToString2(state.datePet[0]?.data?.get("day") as Timestamp)
                         if (state.datePet[0]?.data?.get("status").toString() == "pendiente") {
                             Text(
                                 text = "Tienes una cita pendiente de ser confirmada por la clinica",
@@ -290,7 +352,7 @@ fun PAHome(
                             txtCard = "Cartilla de vacunacion",
                             colorIcon = Color(0xFF99F1A7),
                             modifier = Modifier.weight(1f)
-                        ){
+                        ) {
                             navController.navigate("${Route.PAVaccinationCard}/${user?.uid.toString()}/${state.dataPet?.id}")
                         }
                         Spacer(modifier = Modifier.width(10.dp))
@@ -315,3 +377,5 @@ fun PAHome(
         })
     }
 }
+
+

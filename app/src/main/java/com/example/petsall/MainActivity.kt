@@ -1,5 +1,6 @@
 package com.example.petsall
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -53,7 +55,7 @@ class MainActivity() : ComponentActivity() {
     var permissionRequestCount = 0
     private lateinit var requestMultiplePermissions: ActivityResultLauncher<Array<String>>
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestMultiplePermissions =

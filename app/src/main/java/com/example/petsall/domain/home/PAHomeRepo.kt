@@ -8,5 +8,6 @@ interface PAHomeRepo {
     suspend fun getDataUser(): DocumentSnapshot?
     suspend fun getDataPets(): List<DocumentSnapshot?>
     suspend fun getDatePet(idPet:String): List<DocumentSnapshot?>
+    suspend fun deleteDataPet(idPet: String): Boolean
 
 }

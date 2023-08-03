@@ -32,8 +32,6 @@ import coil.compose.AsyncImage
 import com.example.petsall.R
 import com.example.petsall.presentation.changepets.PAChangePetsEvent
 import com.example.petsall.presentation.changepets.PAChangePetsViewModel
-import com.example.petsall.ui.login.ButtonDefault
-import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.theme.Check
 import com.example.petsall.ui.theme.RoundedTxt
 import com.example.petsall.ui.theme.plata
@@ -50,7 +48,7 @@ fun PAChangePet(
     val state = viewModel.state
     var selectedPet by rememberSaveable { mutableStateOf(petSelect) }
     var selectedBreed by rememberSaveable { mutableStateOf("") }
-    val color = Color(Black.value)
+    val color = Color.Black
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {

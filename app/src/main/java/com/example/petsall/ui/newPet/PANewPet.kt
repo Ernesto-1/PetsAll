@@ -46,7 +46,6 @@ import com.example.petsall.presentation.newpets.PANewPetsEven
 import com.example.petsall.presentation.newpets.PANewPetsViewModel
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
-import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.theme.BtnBlue
 import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.plata
@@ -74,7 +73,7 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
             }
         })
 
-    val color = Color(Black.value)
+    val color = Color.Black
     val scrollState = rememberScrollState()
     val species = listOf(
         "dog" to R.drawable.dog_face,
@@ -139,14 +138,16 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         .weight(1f)
                         .padding(top = 5.dp)
                 ) {
-                    species.take(2).forEach { (name, resourceId) ->
+                    species.take(2).forEach { (nameSpecies, resourceId) ->
                         Spacer(modifier = Modifier.height(18.dp))
                         ImageWithSelection(painter = painterResource(id = resourceId),
-                            contentDescription = name,
-                            isSelected = selectedPet == name,
+                            contentDescription = nameSpecies,
+                            isSelected = selectedPet == nameSpecies,
                             onClick = {
-                                selectedPet = name
-                                selectPet = ""
+                                if (selectedPet != nameSpecies){
+                                    selectedPet = nameSpecies
+                                    selectPet = ""
+                                }
                             })
                     }
                 }
@@ -156,14 +157,16 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         .weight(1f)
                         .padding(top = 33.dp)
                 ) {
-                    species.takeLast(2).forEach { (name, resourceId) ->
+                    species.takeLast(2).forEach { (nameSpecies, resourceId) ->
                         Spacer(modifier = Modifier.height(18.dp))
                         ImageWithSelection(painter = painterResource(id = resourceId),
-                            contentDescription = name,
-                            isSelected = selectedPet == name,
+                            contentDescription = nameSpecies,
+                            isSelected = selectedPet == nameSpecies,
                             onClick = {
-                                selectedPet = name
-                                selectPet = ""
+                                if (selectedPet != nameSpecies){
+                                    selectedPet = nameSpecies
+                                    selectPet = ""
+                                }
                             })
                     }
                 }
@@ -232,7 +235,6 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     trailingIcon = {
                         IconButton(onClick = {
                             mDatePickerDialog.show()
-                            Log.d("gvubhnjmk", birthdate.value)
                         }) {
                             Icon(
                                 Icons.Filled.DateRange, contentDescription = "fecha"
@@ -290,7 +292,7 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                 )
 
                 ButtonDefault(
-                    textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp)
+                    textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp), radius = 16.dp
                 ) {
                     if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectPet.isNotEmpty() && selectedPet.isNotEmpty()) {
                         val timestamp = convertStringToTimestamp(birthdate.value)

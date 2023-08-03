@@ -25,7 +25,6 @@ import androidx.navigation.NavController
 import com.example.petsall.presentation.signup.PASignUpEvent
 import com.example.petsall.presentation.signup.PASignUpViewModel
 import com.example.petsall.ui.theme.BackGroud
-import com.example.petsall.ui.theme.Black
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
 
@@ -38,7 +37,7 @@ fun PASignUp(navController: NavController,viewModel: PASignUpViewModel = hiltVie
     var confirmPassword by rememberSaveable { mutableStateOf("") }
     var hidden by rememberSaveable { mutableStateOf(true) }
     var hiddenConfirm by rememberSaveable { mutableStateOf(true) }
-    val color = Color(Black.value)
+    val color = Color.Black
 
     LaunchedEffect(true) {
 
@@ -64,7 +63,7 @@ fun PASignUp(navController: NavController,viewModel: PASignUpViewModel = hiltVie
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                color = Black
+                color = Color.Black
             )
         }
 
@@ -218,7 +217,7 @@ fun PASignUp(navController: NavController,viewModel: PASignUpViewModel = hiltVie
                     modifier = Modifier
                         .width(282.dp)
                         .padding(bottom = 25.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(12.dp)), radius = 16.dp
                 ) {
                     if (name.isNotEmpty() || lastName.isNotEmpty() || email.isNotEmpty() || password.isNotEmpty() || confirmPassword.isNotEmpty()) {
                         if (password == confirmPassword) {

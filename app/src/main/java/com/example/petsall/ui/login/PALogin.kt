@@ -3,7 +3,6 @@ package com.example.petsall.ui.login
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.R
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +16,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -25,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,7 +38,7 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var hidden by rememberSaveable { mutableStateOf(true) } //1
-    val color = Color(Black.value)
+    val color = Color.Black
     val state = viewModel.state
     val focusRequester = remember { FocusRequester() }
     val screenWidth = LocalConfiguration.current.screenHeightDp.dp
@@ -149,13 +148,13 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ButtonDefault(
-                            textButton = "Iniciar sesion", modifier = Modifier.wrapContentWidth()
+                            textButton = "Iniciar sesion", modifier = Modifier.wrapContentWidth(), radius = 16.dp
                         ) {
                             viewModel.onEvent(PALoginEvent.Login(email, password))
                         }
                         Text(
                             text = "Olvide mi contraseña",
-                            color = Black,
+                            color = Color.Black,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
                             modifier = Modifier
@@ -168,7 +167,7 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         ) {
                             Text(
                                 text = "Registrarme",
-                                color = Black,
+                                color = Color.Black,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier
@@ -188,6 +187,8 @@ fun ButtonDefault(
     modifier: Modifier = Modifier,
     textButton: String? = "textBtn",
     enabled: Boolean = true,
+    radius:Dp = 0.dp,
+    colorBackground: Color = BtnBlue,
     onClick: () -> Unit
 ) {
     Button(
@@ -196,9 +197,9 @@ fun ButtonDefault(
         },
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = BtnGreen2,
+            backgroundColor = colorBackground,
             contentColor = MaterialTheme.colors.surface
-        ),modifier = modifier, shape = RoundedCornerShape(16.dp)
+        ),modifier = modifier, shape = RoundedCornerShape(radius)
     ) {
         Text(
             text = textButton ?: ""

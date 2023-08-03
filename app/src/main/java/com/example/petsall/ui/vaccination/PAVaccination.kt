@@ -141,6 +141,7 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                 ) {
                     val newStatusName = data["status"]?.toString() ?: ""
                     val contrastColor = getContrastingColor(colorStatus)
+
                     Box(
                         modifier = Modifier
                             .wrapContentWidth()

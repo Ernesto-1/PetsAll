@@ -68,6 +68,19 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                     }
                 }
             }
+            is PAHomeEvent.DeleteDatePet ->{
+                viewModelScope.launch {
+                    useCase.deleteDatePet(event.idPet).collect() { result ->
+                        when (result) {
+                            is Resource.Loading -> {}
+                            is Resource.Success -> {
+                                state = state.copy(isPetDelete = result.data)
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+            }
             else -> {}
         }
     }

@@ -1,23 +1,27 @@
 package com.example.petsall.ui.emergency
 
 import android.location.Location
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.petsall.presentation.emergency.PAEmergencyEvent
 import com.example.petsall.presentation.emergency.PAEmergencyViewModel
+import com.example.petsall.ui.components.MyMap
+import com.example.petsall.ui.login.ButtonDefault
+import com.example.petsall.ui.theme.RedAlert
 import com.example.petsall.utils.checkLocationPermission
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -25,21 +29,18 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun PAEmergency(viewModel: PAEmergencyViewModel = hiltViewModel()) {
-    val context = LocalContext.current
     val state = viewModel.state
+    val context = LocalContext.current
+    val screenWidth = LocalConfiguration.current.screenHeightDp.dp
+    val imageHeight = (screenWidth * 0.70f)
     var location by remember { mutableStateOf<Location?>(null) }
-    val uiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(
-                myLocationButtonEnabled = true,
-                zoomControlsEnabled = false
-            )
-        )
-    }
-    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
 
     LaunchedEffect(Unit) {
         if (checkLocationPermission(context)) {
@@ -49,62 +50,22 @@ fun PAEmergency(viewModel: PAEmergencyViewModel = hiltViewModel()) {
             }
         }
     }
-
-    if (checkLocationPermission(context)) {
-        if (!state.data?.data.isNullOrEmpty() && checkLocationPermission(context)) {
-
-            val businessLocation =
-                LatLng(
-                    state.data?.data?.get("Latitud") as Double,
-                    state.data?.data?.get("Longitud") as Double
+    if (location?.isComplete == true && !state.data?.data.isNullOrEmpty()){
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            location?.let {
+                MyMap(
+                    modifier = Modifier.height(imageHeight), positionLtLn = LatLng(
+                        state.data?.data?.get("Latitud") as Double,
+                        state.data?.data?.get("Longitud") as Double
+                    ), location = it, nameBussines = state.data?.data?.get("Nombre") as String
                 )
-            val cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(businessLocation, 15f)
             }
-            val myLocation =
-                location?.latitude?.let {
-                    location?.longitude?.let { it1 ->
-                        LatLng(
-                            it,
-                            it1
-                        )
-                    }
-                }
-            val totalLocation = myLocation?.let {
-                LatLngBounds.Builder()
-                    .include(businessLocation)
-                    .include(it)
-                    .build()
-            }
-            Column(modifier = Modifier.fillMaxSize()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(420.dp)
-                        .background(Color.White)
-                        .clip(RoundedCornerShape(16.dp))
-                        .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
-                    elevation = 5.dp
-                ) {
-                    GoogleMap(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraPositionState = cameraPositionState,
-                        uiSettings = uiSettings,
-                        properties = MapProperties(
-                            isMyLocationEnabled = true,
-                            minZoomPreference = 14.5f,
-                            maxZoomPreference = 16.0f,
-                            latLngBoundsForCameraTarget = totalLocation
-                        )
-                    ) {
-                        Marker(
-                            state = MarkerState(position = businessLocation),
-                            title = "Singapore",
-                            snippet = "Marker in Singapore",
-                        )
-                        MapProperties(isMyLocationEnabled = true, isTrafficEnabled = true)
-                    }
-                }
+
+            ButtonDefault(
+                textButton = "Enviar alerta",
+                modifier = Modifier.padding(top = 25.dp, bottom = 18.dp), radius = 12.dp, colorBackground = RedAlert
+            ) {
+
             }
         }
     }

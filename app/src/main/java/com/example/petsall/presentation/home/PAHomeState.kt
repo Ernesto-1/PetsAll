@@ -11,7 +11,8 @@ data class PAHomeState(
     var dataPet: DocumentSnapshot? = null,
     var numPets: Boolean = true,
     var dataPets: List<DocumentSnapshot?> = listOf(),
-    var datePet: List<DocumentSnapshot?> = listOf()
+    var datePet: List<DocumentSnapshot?> = listOf(),
+    var isPetDelete: Boolean? = false,
 
 
 )
