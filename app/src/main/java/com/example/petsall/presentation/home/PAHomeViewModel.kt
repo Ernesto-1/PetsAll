@@ -1,5 +1,6 @@
 package com.example.petsall.presentation.home
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,7 +30,7 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                state = state.copy(data = result.data?.data)
+                                state = state.copy(dataUser = result.data)
                             }
                             else -> {}
                         }
@@ -41,16 +42,22 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                 viewModelScope.launch {
                     useCase.getPets().collect() { result ->
                         when (result) {
-                            is Resource.Loading -> {}
+                            is Resource.Loading -> {
+                                state = state.copy(loadingPets = true)
+                            }
                             is Resource.Success -> {
-                                state = state.copy(numPets = result.data.size < 4 , dataPets = result.data )
+                                state = state.copy(numPets = (result.data?.size ?: 4) < 4, dataPets = result.data,loadingPets = false
+                                )
                                 state = if (event.pet?.isNotEmpty() == true){
-                                    state.copy(dataPet = result.data.first() { it?.id == event.pet })
+                                    state.copy(dataPet = result.data?.first() { it.id == event.pet })
                                 }else{
-                                    state.copy(dataPet = result.data.first())
+                                    state.copy(dataPet = result.data?.first())
                                 }
                             }
-                            else -> {}
+                            else ->{
+                                state = state.copy(dataPet = null, numPets = true, dataPets = listOf(),loadingPets = false)
+                                Log.d("ErrorPets2", result.toString())
+                            }
                         }
                     }
                 }
@@ -61,9 +68,11 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                state = state.copy(datePet = result.data)
+                                state = state.copy(datePet = result.data?.first() )
                             }
-                            else -> {}
+                            else -> {
+                                state = state.copy(datePet = null)
+                            }
                         }
                     }
                 }

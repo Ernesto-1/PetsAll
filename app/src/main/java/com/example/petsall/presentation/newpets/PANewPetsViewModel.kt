@@ -24,10 +24,11 @@ class PANewPetsViewModel @Inject constructor(private val useCase: PANewPetsUseCa
                 viewModelScope.launch {
                     useCase.registerPet(name = event.name, breed = event.breeds, birthday = event.birthday, pet = event.pets, img = event.img).collect() { result ->
                         when (result) {
-                            is Resource.Loading -> {}
+                            is Resource.Loading -> {
+                                state = state.copy(loading = true)
+                            }
                             is Resource.Success -> {
-                                state = state.copy()
-                                Log.d("rtyubnm", result.data.toString())
+                                state = state.copy(success = result.data,loading = false)
                             }
                             else -> {}
                         }

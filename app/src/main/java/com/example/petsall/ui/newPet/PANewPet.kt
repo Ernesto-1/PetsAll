@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -59,6 +60,7 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
         navController.currentBackStackEntryAsState().value?.savedStateHandle?.get<String>("selectPet")
             ?: ""
     val birthdate = rememberSaveable { mutableStateOf("") }
+    val state = viewModel.state
     val focusManager = LocalFocusManager.current
     var selectedPet by rememberSaveable { mutableStateOf("dog") }
     var name by rememberSaveable { mutableStateOf("") }
@@ -97,6 +99,12 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
             focusManager.clearFocus()
         }, mYear, mMonth, mDay
     )
+
+    LaunchedEffect(key1 = state.success){
+        if (state.success){
+            navController.navigate(Route.PAHome)
+        }
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -281,7 +289,8 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                         style = SpanStyle(
                             textDecoration = TextDecoration.None,
                             fontSize = 15.sp,
-                            color = BtnBlue
+                            color = BtnBlue,
+                            fontWeight = FontWeight.Medium
                         )
                     ) {
                         append("Subir foto de perfil")
@@ -290,9 +299,12 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                     launcher.launch("image/*")
                 }, modifier = Modifier.padding(vertical = 20.dp)
                 )
+                if (state.loading){
+                    CircularProgressIndicator()
+                }
 
                 ButtonDefault(
-                    textButton = "Agregar", modifier = Modifier.padding(horizontal = 40.dp), radius = 16.dp
+                    textButton = "Agregar", enabled = !state.loading, modifier = Modifier.padding(horizontal = 40.dp), radius = 16.dp
                 ) {
                     if (name.isNotEmpty() && birthdate.value.isNotEmpty() && selectPet.isNotEmpty() && selectedPet.isNotEmpty()) {
                         val timestamp = convertStringToTimestamp(birthdate.value)
@@ -305,7 +317,6 @@ fun PANewPet(navController: NavController, viewModel: PANewPetsViewModel = hiltV
                                 img = selectedImage
                             )
                         )
-                        navController.navigate(Route.PAHome)
                     }
                 }
             }

@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.petsall.R
+import com.example.petsall.data.remote.model.PetData
 import com.example.petsall.presentation.changepets.PAChangePetsEvent
 import com.example.petsall.presentation.changepets.PAChangePetsViewModel
 import com.example.petsall.ui.theme.Check
@@ -141,29 +142,32 @@ fun PAChangePet(
 @Preview
 @Composable
 fun CardChangePet(
-    data: Map<String, Any>? = mapOf(),
+    data: PetData? = null,
     id: String = "",
     isSelected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    if (data?.isNotEmpty() == true) {
+    if (data?.id?.isNotEmpty() == true) {
+        Card(modifier = Modifier.clip(RoundedCornerShape(topStart = 12.dp, topEnd = 0.dp, bottomEnd = 0.dp, bottomStart = 12.dp))) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .wrapContentHeight(),
+                .background(Color.White)
+                .wrapContentHeight().clip(RoundedCornerShape(12.dp)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 modifier = Modifier
                     .weight(2f)
+                    .clip(RoundedCornerShape(12.dp))
                     .padding(vertical = 10.dp, horizontal = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (data["ImgUrl"].toString() != "") {
+                if (data.img != "") {
                     AsyncImage(
-                        model = data["ImgUrl"].toString(),
+                        model = data.img,
                         contentDescription = "imageFromUrl",
                         modifier = Modifier
                             .height(70.dp)
@@ -184,7 +188,7 @@ fun CardChangePet(
 
                 }
                 Text(
-                    text = data["Nombre"].toString(),
+                    text = data.name ?: "",
                     fontSize = 20.sp,
                     modifier = Modifier.padding(horizontal = 8.dp),
                     fontWeight = FontWeight.Medium
@@ -200,6 +204,7 @@ fun CardChangePet(
             }
 
         }
+    }
         Card(
             modifier = Modifier
                 .fillMaxWidth()

@@ -73,6 +73,7 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
                                 Log.d("RegisterDate", result.data.toString())
                             }
                             is Resource.Failure -> {}
+                            else -> {}
                         }
                     }
                 }

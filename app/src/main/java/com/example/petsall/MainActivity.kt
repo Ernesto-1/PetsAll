@@ -31,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.petsall.ui.business.PABusinessList
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
 import com.example.petsall.ui.explore.PAExplore
@@ -139,7 +140,14 @@ class MainActivity() : ComponentActivity() {
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
                             composable(Route.PAEmergency) { PAEmergency() }
-                            composable(Route.PAExplore) { PAExplore() }
+                            composable("${Route.PABusinessList}/{nameList}",
+                                arguments = listOf(navArgument("nameList") {
+                                    type = NavType.StringType
+                                })
+                                ) { backStackEntry ->
+                                    PABusinessList(nameListBusiness = backStackEntry.arguments?.getString("nameList") ?: "",navController = navigationController)
+                                }
+                            composable(Route.PAExplore) { PAExplore(navController = navigationController) }
                             composable(
                                 "${Route.PAVaccinationCard}/{idUser}/{idPet}",
                                 arguments = listOf(navArgument("idUser") {

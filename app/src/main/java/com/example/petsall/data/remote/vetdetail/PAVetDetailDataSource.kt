@@ -38,10 +38,10 @@ class PAVetDetailDataSource @Inject constructor(
                 .whereEqualTo("patient", patient).get().await()
 
         val date = hashMapOf(
-            "date" to day,
+            "day" to day,
             "patient" to patient,
             "reason" to reason,
-            "status" to "earring",
+            "status" to "pendiente",
             "idVeterinaria" to idVet
         )
         return if (appointmentDate.isEmpty) {

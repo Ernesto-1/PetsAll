@@ -45,9 +45,12 @@ class PALoginViewModel @Inject constructor(private val useCase: PALogginUseCase)
                                         state.copy(
                                             message = "El usuario o contraseña son incorrectos",
                                         )
-                                    } else {
-                                        state.copy(message = "")
+                                    } else if (result.exception.message?.contains("There is no user record corresponding to this identifier") == true) {
+                                        state.copy(message = "No existe una cuenta asociada a este correo electronico")
+                                    }else{
+                                        state.copy(message = "Error")
                                     }
+                                state = state.copy(success = false)
 
                             }
                             else -> {}

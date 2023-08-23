@@ -5,5 +5,5 @@ import com.google.firebase.Timestamp
 
 interface PANewPetsRepo {
 
-    suspend fun setNewPet(name: String, breed : String, birthday: Timestamp?, pet : String, img: Bitmap?)
+    suspend fun setNewPet(name: String, breed : String, birthday: Timestamp?, pet : String, img: Bitmap?): Boolean
 }

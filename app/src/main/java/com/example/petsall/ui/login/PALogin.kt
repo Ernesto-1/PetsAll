@@ -37,9 +37,11 @@ import com.example.petsall.ui.theme.*
 fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewModel()) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var hidden by rememberSaveable { mutableStateOf(true) } //1
-    val color = Color.Black
+    var hidden by rememberSaveable { mutableStateOf(true) }
+    var errorEmail by rememberSaveable { mutableStateOf(false) }
+    var errorPassword by rememberSaveable { mutableStateOf(false) }
     val state = viewModel.state
+    val emailRegex = Regex("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}")
     val focusRequester = remember { FocusRequester() }
     val screenWidth = LocalConfiguration.current.screenHeightDp.dp
     val imageHeight = (screenWidth * 0.55f)
@@ -60,7 +62,7 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(id = com.example.petsall.R.drawable.all_pets_logo),
+                    painter = painterResource(id = com.example.petsall.R.drawable.logo_svg_sinbackground),
                     contentDescription = "img_login",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -77,7 +79,14 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
 
                     OutlinedTextField(
                         value = email,
-                        onValueChange = { email = it },
+                        onValueChange = {newEmail ->
+
+                            if (newEmail.isEmpty() || newEmail.all { it.isLetterOrDigit() || it == '.' || it == '-' || it == '@' || it == '_'}) {
+                                email = newEmail
+                                errorEmail = false
+                                state.message = ""
+                            }
+},
                         label = { Text("Correo Electrónico") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -96,15 +105,19 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = plata,
                             unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-                            textColor = color
-                        )
+                            textColor = Color.Black
+                        ), isError = errorEmail || state.message.isNotEmpty()
                     )
 
                     Spacer(modifier = Modifier.height(5.dp))
 
                     OutlinedTextField(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = { pass ->
+                            password = pass
+                            errorPassword = false
+                            state.message = ""
+                                        },
                         label = { Text("Contraseña") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -119,7 +132,7 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                                     val vector = painterResource(
                                         if (hidden) com.example.petsall.R.drawable.ic_baseline_remove_red_eye_24 else com.example.petsall.R.drawable.ic_baseline_visibility_off_24)
                                     val description =
-                                        if (hidden) "Ocultar contraseña" else "Revelar contraseña" //6
+                                        if (hidden) "Ocultar contraseña" else "Revelar contraseña"
                                     Icon(painter = vector, contentDescription = description)
                                 }
                             }
@@ -135,13 +148,18 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = plata,
                             unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(alpha = 0.15f),
-                            textColor = color
-                        )
+                            textColor = Color.Black
+                        ), isError = errorPassword || state.message.isNotEmpty()
                     )
-                    if (viewModel.state.message.isNotEmpty()){
-                        Spacer(modifier = Modifier.height(8.dp).fillMaxWidth())
-                        Text(text = viewModel.state.message, textAlign = TextAlign.Center, color = BackGroud)
+
+                    if (errorEmail || state.message.isNotEmpty() || errorPassword) {
+                        Text(
+                            text = state.message.ifEmpty { "Campo obligatorio" },
+                            color = RedAlert,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
                     }
+
                     Spacer(modifier = Modifier.height(20.dp))
                     Column(
                         modifier = Modifier.wrapContentSize(),
@@ -150,10 +168,19 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                         ButtonDefault(
                             textButton = "Iniciar sesion", modifier = Modifier.wrapContentWidth(), radius = 16.dp
                         ) {
-                            viewModel.onEvent(PALoginEvent.Login(email, password))
+                            if (email.isNotEmpty() && password.isNotEmpty() && email.matches(emailRegex)){
+                                viewModel.onEvent(PALoginEvent.Login(email, password))
+                            }else{
+                                errorEmail = true
+                                errorPassword = true
+                                if (!email.matches(emailRegex)){
+                                    state.message = "Nombre de usuario o contraseña no validos"
+                                }
+                            }
+
                         }
                         Text(
-                            text = "Olvide mi contraseña",
+                            text = "¿Olvidaste tu contraseña?",
                             color = Color.Black,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Light,
@@ -166,13 +193,13 @@ fun PALogin(navController: NavController,viewModel: PALoginViewModel = hiltViewM
                             contentAlignment = Alignment.BottomCenter
                         ) {
                             Text(
-                                text = "Registrarme",
+                                text = "¿No tienes cuenta? Registrate",
                                 color = Color.Black,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier
                                     .clickable { navController.navigate(Route.PASignUp) }
-                                    .padding(bottom = 15.dp)
+                                    .padding(bottom = 16.dp)
                             )
                         }
                     }
@@ -197,7 +224,7 @@ fun ButtonDefault(
         },
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorBackground,
+            backgroundColor = if (enabled)colorBackground else BackGroud,
             contentColor = MaterialTheme.colors.surface
         ),modifier = modifier, shape = RoundedCornerShape(radius)
     ) {

@@ -2,6 +2,7 @@ package com.example.petsall.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
@@ -17,7 +18,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +43,9 @@ import com.example.petsall.ui.components.DismissBackground
 import com.example.petsall.ui.components.PACard
 import com.example.petsall.ui.components.PACard2
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
+import com.example.petsall.ui.components.skeleton.ImageTopSkeleton
+import com.example.petsall.ui.components.skeleton.TopBarSkeleton
+import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.utils.checkLocationPermission
 import com.example.petsall.utils.convertTimestampToString2
@@ -72,7 +74,6 @@ fun PAHome(
     val sharedPreferences = context.getSharedPreferences("nombre_pref", Context.MODE_PRIVATE)
     val valor = sharedPreferences.getString("idPet", "")
 
-
     LaunchedEffect(Unit) {
         if (activity.permissionRequestCount < 1) {
             if (!checkLocationPermission(context)) {
@@ -85,210 +86,200 @@ fun PAHome(
         }
         sheetState.hide()
         viewModel.onEvent(PAHomeEvent.GetDataPets(selectPet))
+    }
+
+    LaunchedEffect(selectPet) {
+        if (selectPet.isNotEmpty()) {
+            if (state.dataPets?.isNotEmpty() == true) {
+                state.dataPet = state.dataPets?.first { it.id == selectPet }
+            }
+        } else {
+            viewModel.onEvent(PAHomeEvent.GetDataPets(selectPet))
+        }
         viewModel.onEvent(PAHomeEvent.GetDatePet(selectPet))
     }
 
-    if (state.data?.isNotEmpty() == true && state.dataPets.isNotEmpty()) {
-        val name by rememberSaveable { mutableStateOf(state.data?.get("Nombre")) }
-        LaunchedEffect(selectPet) {
-            if (selectPet.isNotEmpty()){
-                state.dataPet = state.dataPets.first{ it?.id == selectPet }
-            }else{
-                state.dataPet = state.dataPets.first()
-                selectPet = state.dataPet?.id.toString()
-            }
-            viewModel.onEvent(PAHomeEvent.GetDatePet(selectPet))
-        }
-
-        BackHandler {
-            activity.moveTaskToBack(true)
-        }
+    BackHandler {
+        activity.moveTaskToBack(true)
+    }
+    LaunchedEffect(key1 = state.isPetDelete){
         if (state.isPetDelete == true) {
             Toast.makeText(
-                context,
-                "Se elimino exitosamente de tu lista",
-                Toast.LENGTH_SHORT
+                context, "Se elimino exitosamente de tu lista", Toast.LENGTH_SHORT
             ).show()
+            viewModel.onEvent(PAHomeEvent.GetDataPets(""))
             state.isPetDelete = false
         }
+    }
 
-        Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-            TopAppBar(
-                title = {
+
+    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
+        TopAppBar(
+            title = {
+                if (state.loadingPets){
+                    TopBarSkeleton()
+                }else{
                     Column(verticalArrangement = Arrangement.Center) {
                         Row {
-                            if (state.dataPet?.data?.get("ImgUrl").toString() != "") {
+                            if (state.dataPets?.isNotEmpty() == true) {
                                 AsyncImage(
-                                    model = state.dataPet?.data?.get("ImgUrl").toString(),
+                                    model = if (state.dataPet?.img?.isNotEmpty() == true) state.dataPet?.img else R.drawable.fish,
                                     contentDescription = "Img pet",
                                     modifier = Modifier
                                         .height(50.dp)
                                         .width(50.dp)
                                         .clip(shape = RoundedCornerShape(50.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Image(
-                                    painter = painterResource(id = R.drawable.fish),
-                                    contentDescription = "Image pet local",
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .width(50.dp)
-                                        .clip(shape = RoundedCornerShape(50.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = state.dataPet?.data?.get("Nombre").toString(),
-                                modifier = Modifier.align(
-                                    Alignment.CenterVertically
-                                ),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Light
-                            )
-                            Icon(imageVector = Icons.Filled.ArrowDropDown,
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .align(
-                                        Alignment.CenterVertically
+                                    contentScale = ContentScale.Crop, placeholder = painterResource(
+                                        id = R.drawable.circle_24_image
                                     )
-                                    .clickable {
-                                        scope.launch {
-                                            sheetState.show()
-                                        }
-                                    })
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = state.dataPet?.name.toString(), modifier = Modifier.align(
+                                        Alignment.CenterVertically
+                                    ), fontSize = 20.sp, fontWeight = FontWeight.Light
+                                )
+                                Icon(imageVector = Icons.Filled.ArrowDropDown,
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .align(
+                                            Alignment.CenterVertically
+                                        )
+                                        .clickable {
+                                            scope.launch {
+                                                sheetState.show()
+                                            }
+                                        })
+                            } else {
+                                ButtonDefault(textButton = "Agregar mascota", radius = 12.dp) {
+                                    navController.navigate(Route.PANewPet)
+                                }
+                            }
                         }
-
                     }
-                },
-                backgroundColor = Color.White,
-                elevation = 0.dp,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(vertical = 10.dp)
-            )
-        }, drawerElevation = 0.dp, drawerShape = MaterialTheme.shapes.small, content = {
-            ModalBottomSheetLayout(sheetState = sheetState,
-                sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                modifier = Modifier.padding(0.dp),
-                sheetContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(unbounded = false)
-                            .wrapContentHeight(unbounded = true)
+                }
+
+            },
+            backgroundColor = Color.White,
+            elevation = 0.dp,
+            modifier = Modifier
+                .wrapContentHeight()
+                .padding(vertical = 10.dp)
+        )
+    }, drawerElevation = 0.dp, drawerShape = MaterialTheme.shapes.small, content = {
+        ModalBottomSheetLayout(sheetState = sheetState,
+            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            modifier = Modifier.padding(0.dp),
+            sheetContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(unbounded = false)
+                        .wrapContentHeight(unbounded = true)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.Start
                     ) {
+
+                        HeaderBottomSheet()
                         Column(
-                            horizontalAlignment = Alignment.Start
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(327.dp)
+                                .background(Color.White),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            HeaderBottomSheet()
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(327.dp)
-                                    .background(Color.White),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                if (state.dataPets.isNotEmpty()) {
-                                    LazyColumn {
-                                        items(items = state.dataPets) { item ->
-                                            var show by remember { mutableStateOf(true) }
-                                            val dismissState = rememberDismissState(
-                                                confirmStateChange = {
-                                                    if (it == DismissValue.DismissedToEnd) {
-                                                        show = false
-                                                        true
-                                                    } else false
-                                                }
-                                            )
-                                            AnimatedVisibility(
-                                                show, exit = fadeOut(spring())
-                                            ) {
-                                                SwipeToDismiss(
-                                                    state = dismissState,
-                                                    modifier = Modifier,
-                                                    background = {
-                                                        DismissBackground(dismissState)
-                                                    },
-                                                    dismissContent = {
-                                                        CardChangePet(data = item?.data,
-                                                            "",
-                                                            isSelected = selectPet == item?.id.toString(),
-                                                            onClick = {
+                            if (state.dataPets?.isNotEmpty() == true) {
+                                LazyColumn {
+                                    items(items = state.dataPets ?: mutableListOf(),
+                                        key = { it.id.toString() }) { item ->
+                                        Log.d("Mascotas",item.id.toString())
+                                        var show by remember { mutableStateOf(true) }
+                                        val dismissState =
+                                            rememberDismissState(confirmStateChange = {
+                                                if (it == DismissValue.DismissedToEnd) {
+                                                    show = false
+                                                    true
+                                                } else false
+                                            })
+                                        AnimatedVisibility(
+                                            show, exit = fadeOut(spring())
+                                        ) {
+                                            SwipeToDismiss(state = dismissState,
+                                                modifier = Modifier,
+                                                background = {
+                                                    DismissBackground(dismissState)
+                                                },
+                                                dismissContent = {
+                                                    CardChangePet(data = item,
+                                                        item.id.toString(),
+                                                        isSelected = selectPet == item.id.toString(),
+                                                        onClick = {
+                                                            if (selectPet != item.id.toString()){
                                                                 scope.launch {
-                                                                    selectPet = item?.id.toString()
-                                                                    sharedPreferences.edit()
-                                                                        .putString(
-                                                                            "idPet",
-                                                                            selectPet
-                                                                        ).apply()
+                                                                    selectPet = item.id.toString()
+                                                                    sharedPreferences.edit().putString(
+                                                                        "idPet", selectPet
+                                                                    ).apply()
                                                                     sheetState.hide()
                                                                 }
-                                                            })
-                                                    }
-                                                )
-                                            }
+                                                            }
 
-                                            LaunchedEffect(show) {
-                                                if (!show) {
-                                                    delay(800)
-                                                    selectPet = ""
-                                                    sharedPreferences.edit()
-                                                        .putString(
-                                                            "idPet",
-                                                            ""
-                                                        ).apply()
-                                                    viewModel.onEvent(PAHomeEvent.DeleteDatePet(item?.id.toString()))
-                                                    sheetState.hide()
-                                                    viewModel.onEvent(PAHomeEvent.GetDataPets(""))
-
-                                                }
-                                            }
-
+                                                        })
+                                                })
                                         }
-                                        item {
-                                            if (state.numPets) {
+
+                                        LaunchedEffect(show) {
+                                            if (!show) {
+                                                delay(800)
+                                                selectPet = ""
+                                                sharedPreferences.edit().putString(
+                                                        "idPet", ""
+                                                    ).apply()
+                                                viewModel.onEvent(PAHomeEvent.DeleteDatePet(item.id.toString()))
+                                                sheetState.hide()
+                                            }
+                                        }
+
+                                    }
+                                    item {
+                                        if (state.numPets) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable(onClick = {
+                                                        navController.navigate(Route.PANewPet)
+                                                    })
+                                                    .wrapContentHeight(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
                                                 Row(
                                                     modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .clickable(onClick = {
-                                                            navController.navigate(Route.PANewPet)
-                                                            scope.launch {
-                                                                sheetState.hide()
-                                                            }
-                                                        })
-                                                        .wrapContentHeight(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                        .weight(2f)
+                                                        .padding(
+                                                            vertical = 10.dp, horizontal = 15.dp
+                                                        ),
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Row(
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Add,
+                                                        contentDescription = "ImageLocal",
                                                         modifier = Modifier
-                                                            .weight(2f)
-                                                            .padding(
-                                                                vertical = 10.dp, horizontal = 15.dp
-                                                            ),
-                                                        verticalAlignment = Alignment.CenterVertically
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = Icons.Filled.Add,
-                                                            contentDescription = "ImageLocal",
-                                                            modifier = Modifier
-                                                                .height(70.dp)
-                                                                .width(70.dp)
-                                                                .clip(
-                                                                    shape = RoundedCornerShape(
-                                                                        50.dp
-                                                                    )
+                                                            .height(70.dp)
+                                                            .width(70.dp)
+                                                            .clip(
+                                                                shape = RoundedCornerShape(
+                                                                    50.dp
                                                                 )
-                                                        )
-                                                        Text(
-                                                            text = "Agregar mascota",
-                                                            fontSize = 20.sp,
-                                                            modifier = Modifier.padding(horizontal = 8.dp),
-                                                            fontWeight = FontWeight.Medium
-                                                        )
-                                                    }
+                                                            )
+                                                    )
+                                                    Text(
+                                                        text = "Agregar mascota",
+                                                        fontSize = 20.sp,
+                                                        modifier = Modifier.padding(horizontal = 8.dp),
+                                                        fontWeight = FontWeight.Medium
+                                                    )
                                                 }
                                             }
                                         }
@@ -297,85 +288,91 @@ fun PAHome(
                             }
                         }
                     }
-                }) {
-                Column(
+                }
+            }) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Hola ${state.dataUser?.name}!",
+                    fontSize = 24.sp,
                     modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                        .fillMaxWidth()
+                        .padding(top = 35.dp),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(50.dp))
+
+                if (state.dataPets?.isNotEmpty() == true) {
                     Text(
-                        text = "Hola ${name}!",
-                        fontSize = 24.sp,
+                        text = if (state.datePet == null) "No tienes citas pendientes" else {
+                            when (state.datePet?.status.toString()) {
+                                "pendiente" -> "Tienes una cita pendiente de ser confirmada por la clinica"
+                                "confirmado" -> {
+                                    val datePet =
+                                        convertTimestampToString2(state.datePet?.dateMedic as Timestamp)
+                                    "${
+                                        state.dataPet?.name
+                                    } tiene una cita el $datePet"
+                                }
+                                else -> ""
+                            }
+                        },
+                        fontSize = 20.sp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 35.dp),
-                        textAlign = TextAlign.Center
+                            .padding(horizontal = 77.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color(0xff84B1B8)
                     )
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    if (state.datePet.isNotEmpty()) {
-                        val datePet =
-                            convertTimestampToString2(state.datePet[0]?.data?.get("day") as Timestamp)
-                        if (state.datePet[0]?.data?.get("status").toString() == "pendiente") {
-                            Text(
-                                text = "Tienes una cita pendiente de ser confirmada por la clinica",
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 77.dp),
-                                textAlign = TextAlign.Center,
-                                color = Color(0xff84B1B8)
-                            )
-                        } else if (state.datePet[0]?.data?.get("status")
-                                .toString() == "confirmado"
-                        ) {
-                            Text(
-                                text = "${
-                                    state.dataPet?.data?.get("Nombre").toString()
-                                } tiene una cita el $datePet ",
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 77.dp),
-                                textAlign = TextAlign.Center,
-                                color = Color(0xff84B1B8)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(50.dp))
-                    }
-
-                    Row {
-                        PACard2(
-                            iconCard = R.drawable.healt,
-                            txtCard = "Cartilla de vacunacion",
-                            colorIcon = Color(0xFF99F1A7),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            navController.navigate("${Route.PAVaccinationCard}/${user?.uid.toString()}/${state.dataPet?.id}")
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        PACard2(
-                            iconCard = R.drawable.proceedings,
-                            txtCard = "Expediente",
-                            colorIcon = Color(0xff78CEFF),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(25.dp))
-                    PACard(
-                        iconCard = R.drawable.request,
-                        txtCard = "Solicitar constancia digital",
-                        colorIcon = Color(0xffF0E1FF)
+                } else {
+                    Text(
+                        text = "No tienes mascotas registradas",
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 77.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color(0xff84B1B8)
                     )
-                    Spacer(modifier = Modifier.height(35.dp))
                 }
+                Spacer(modifier = Modifier.height(50.dp))
+                Row {
+                    PACard2(
+                        iconCard = R.drawable.healt,
+                        txtCard = "Cartilla de vacunacion",
+                        colorIcon = Color(0xFF99F1A7),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        navController.navigate("${Route.PAVaccinationCard}/${user?.uid.toString()}/${state.dataPet?.id}")
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    PACard2(
+                        iconCard = R.drawable.proceedings,
+                        txtCard = "Expediente",
+                        colorIcon = Color(0xff78CEFF),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+                PACard(
+                    iconCard = R.drawable.request,
+                    txtCard = "Solicitar constancia digital",
+                    colorIcon = Color(0xffF0E1FF)
+                )
+                Spacer(modifier = Modifier.height(35.dp))
             }
-        })
-    }
+        }
+    })
 }
 
-
+@Composable
+fun ImageSkeleton(){
+    ImageTopSkeleton()
+}

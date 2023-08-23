@@ -35,9 +35,12 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                                         locationValue.latitude = it?.data?.get("Latitud") as Double
                                         locationValue.longitude = it.data?.get("Longitud") as Double
                                         event.location.distanceTo(locationValue) < 10000
+                                    }.sortedBy {
+                                        locationValue.latitude = it?.data?.get("Latitud") as Double
+                                        locationValue.longitude = it.data?.get("Longitud") as Double
+                                        event.location.distanceTo(locationValue)
                                     }
-                                    result.data[0]?.data?.get("specialized_sector")
-                                        ?.let { Log.d("especializaciones", it.toString()) }
+
                                     state = state.copy(data = filterCoordinates)
                                 }else{
                                     state = state.copy(data = listOf())

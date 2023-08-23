@@ -1,5 +1,7 @@
 package com.example.petsall.domain.home
 
+import android.util.Log
+import com.example.petsall.data.remote.model.*
 import com.example.petsall.utils.Resource
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
@@ -8,33 +10,39 @@ import javax.inject.Inject
 
 class PAHomeUseCase @Inject constructor(private val repository: PAHomeRepo) {
 
-    suspend operator fun invoke(): Flow<Resource<DocumentSnapshot?>> =
+    suspend operator fun invoke(): Flow<Resource<UserDataClass?>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getDataUser()))
+                val documentSnapshot = repository.getDataUser()
+                val userData = documentSnapshot?.mapTouserDataClass()
+                emit(Resource.Success(userData))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))
             }
         }
 
-    suspend fun getPets(): Flow<Resource<List<DocumentSnapshot?>>> =
-        flow {
+    suspend fun getPets(): Flow<Resource<List<PetData>?>> =
+        flow{
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getDataPets()))
+                val documentSnapshots = repository.getDataPets()
+                val petsData = documentSnapshots.mapToPetsDataClass().mascotas
+                emit(Resource.Success(petsData))
             } catch (e: Exception) {
-                emit(Resource.Failure(e))
+                 //emit(Resource.Failure(e))
             }
         }
 
-    suspend fun getDatePet(idPet: String): Flow<Resource<List<DocumentSnapshot?>>> =
+    suspend fun getDatePet(idPet: String): Flow<Resource<List<PetDateMedic>?>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getDatePet(idPet = idPet)))
+                val documentSnapshots = repository.getDatePet(idPet)
+                val petsDateMedic = documentSnapshots.mapToDateMedicDataClass().datesMedic
+                emit(Resource.Success(petsDateMedic))
             } catch (e: Exception) {
-                emit(Resource.Failure(e))
+               // emit(Resource.Failure(e))
             }
         }
 
