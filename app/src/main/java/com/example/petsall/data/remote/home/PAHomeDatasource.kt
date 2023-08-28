@@ -42,12 +42,12 @@ class PAHomeDatasource @Inject constructor(
 
             // Delete documents in Cartilla collection
             for (document in cartillaRef.documents) {
-                document.reference.delete().await()
+                document.reference.delete()
             }
 
             // Delete documents in Citas collection
             for (document in citasRef.documents) {
-                document.reference.delete().await()
+                document.reference.delete()
             }
 
             // Delete pet document
@@ -56,17 +56,17 @@ class PAHomeDatasource @Inject constructor(
             // Delete image from storage
             val storageRef =
                 storage.reference.child("images/${firebaseAuth.uid.toString()}/pets/$idPet/$idPet")
-            storageRef.delete().await()
+            storageRef.delete()
 
             true
         } catch (e: Exception) {
             false
         }
     }
-   suspend fun getDatePet(idPet: String): List<DocumentSnapshot?> {
+   suspend fun getDatePet(): List<DocumentSnapshot?> {
         val datePetQuery = firebaseFirestore.collection("Citas")
             .whereIn("status", listOf("pendiente", "confirmado"))
-            .whereEqualTo("patient", idPet)
+            .whereEqualTo("userId", firebaseAuth.uid.toString())
 
         return try {
             val datePet = datePetQuery.get().await()

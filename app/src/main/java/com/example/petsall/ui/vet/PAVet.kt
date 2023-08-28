@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.petsall.R
+import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.presentation.vet.PAVetEvent
 import com.example.petsall.presentation.vet.PAVetViewModel
 import com.example.petsall.ui.navigation.Route
@@ -66,8 +67,8 @@ fun PAVet(
                 LazyColumn {
                     items(state.data) { item ->
                         location?.let {
-                            CardVet(data = item?.data, id = item?.id.toString(), location = it) {
-                                navController.navigate("${Route.PAVetDetail}/${item?.id.toString()}")
+                            CardVet(data = item, id = item.id, location = it) {
+                                navController.navigate("${Route.PAVetDetail}/${item.id}")
                             }
                         }
                     }
@@ -81,7 +82,6 @@ fun PAVet(
                 .background(Color(0xffF9F9F9))
         ) {
             Text("Debes aceptar los permisos de ubicacion")
-
         }
     }
 }
@@ -90,17 +90,17 @@ fun PAVet(
 @Composable
 fun CardVet(
     location: Location = Location(""),
-    data: Map<String, Any>? = mapOf(),
+    data: VetData? = null,
     id: String = "",
     onClick: () -> Unit = {}
 ) {
-    if (!data.isNullOrEmpty()) {
+    if (data != null) {
         val locationValue = Location("location value.")
-        locationValue.latitude = data["Latitud"] as Double
-        locationValue.longitude = data["Longitud"] as Double
-        val distancia = location.distanceTo(locationValue).toString()
+        locationValue.latitude = data.lat
+        locationValue.longitude = data.long
+        val distance = location.distanceTo(locationValue).toString()
 
-        distancia.count()
+        distance.count()
         Card(modifier = Modifier
             .fillMaxWidth()
             .clickable {
@@ -131,13 +131,13 @@ fun CardVet(
                 }
                 Column(modifier = Modifier.fillMaxHeight().padding(start = 8.dp)) {
                     Text(
-                        text = data["Nombre"].toString(),
+                        text = data.name ?: "",
                         fontSize = 17.sp,
                         color = Purple500,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    val listSpecialized = data["specialized_sector"] as List<*>
+                    val listSpecialized = data.listSpecializedSector as List<*>
 
                     Text(buildString {
                         for (index in listSpecialized.indices) {
@@ -150,7 +150,7 @@ fun CardVet(
                         }
                     }, fontSize = 12.sp,modifier = Modifier.padding(bottom = 4.dp))
 
-                    Text(text = "${distancia.split(".")[0]}m", fontSize = 12.sp)
+                    Text(text = "${distance.split(".")[0]}m", fontSize = 12.sp)
                 }
 
             }

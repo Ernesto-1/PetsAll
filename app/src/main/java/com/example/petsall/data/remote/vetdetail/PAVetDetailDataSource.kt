@@ -27,33 +27,42 @@ class PAVetDetailDataSource @Inject constructor(
 
     suspend fun registerDate(
         day: Timestamp?,
-        time: String,
         patient: String,
         reason: String,
         idVet: String
     ): Boolean {
+        try {
+            val existingAppointments = firebaseFirestore.collection("Citas")
+                .whereIn("status", listOf("pendiente", "confirmado"))
+                .whereEqualTo("patient", patient)
+                .get()
+                .await()
+            Log.e("registerDate", existingAppointments.isEmpty.toString())
 
-        val appointmentDate =
-            firebaseFirestore.collection("Citas").whereIn("status", listOf("earring", "confirmed"))
-                .whereEqualTo("patient", patient).get().await()
-
-        val date = hashMapOf(
-            "day" to day,
-            "patient" to patient,
-            "reason" to reason,
-            "status" to "pendiente",
-            "idVeterinaria" to idVet
-        )
-        return if (appointmentDate.isEmpty) {
-            firebaseFirestore.collection("Citas").document().set(date).await()
-            true
-        } else {
-            false
+            return if (existingAppointments.documents.isEmpty()) {
+                val newAppointment = hashMapOf(
+                    "day" to day,
+                    "patient" to patient,
+                    "reason" to reason,
+                    "status" to "pendiente",
+                    "idVeterinaria" to idVet,
+                    "userId" to firebaseAuth.uid.toString()
+                )
+                firebaseFirestore.collection("Citas").add(newAppointment).await()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            Log.e("registerDate", "Error adding appointment", e)
+            return false
         }
     }
 
+
     suspend fun getDataPets(): List<DocumentSnapshot?> {
-        val dataPets = firebaseFirestore.collection("Users").document(firebaseAuth.uid.toString()).collection("Mascotas").get().await()
+        val dataPets = firebaseFirestore.collection("Users").document(firebaseAuth.uid.toString())
+            .collection("Mascotas").get().await()
         return dataPets.documents
     }
 }

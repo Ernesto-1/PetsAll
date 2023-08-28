@@ -46,7 +46,6 @@ import com.example.petsall.ui.components.listSpecialized
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.theme.*
 import com.example.petsall.utils.*
-import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -86,7 +85,8 @@ fun PAVetDetail(
 
 
     val mDatePickerDialog = datePicker(date = date, context = context, focusManager = focusManager)
-    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+    val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
 
     BackHandler {
         navController.navigateUp()
@@ -105,14 +105,25 @@ fun PAVetDetail(
         }
     }
 
+    LaunchedEffect(key1 = state.successRegister) {
+        val message =
+            if (state.successRegister == true) "Se envio tu peticion de cita exitosamente" else "Tu mascota ya cuenta con una cita pendiente"
+
+        if (state.successRegister == true || state.successRegister == false) {
+            Toast.makeText(
+                context, message, Toast.LENGTH_LONG
+            ).show()
+            state.successRegister = null
+        }
+
+    }
 
 
-    if (!state.dataVet.isNullOrEmpty() && checkLocationPermission(context)) {
-
+    if (!state.dataVet?.id.isNullOrEmpty() && checkLocationPermission(context)) {
         Scaffold(topBar = {
             TopAppBar(title = {
                 Text(
-                    text = state.dataVet!!["Nombre"].toString(),
+                    text = state.dataVet?.name ?: "",
                     color = Snacbar,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -144,20 +155,20 @@ fun PAVetDetail(
                             .wrapContentHeight(unbounded = true)
                     ) {
                         Column(
+                            modifier = Modifier.wrapContentHeight(),
                             horizontalAlignment = Alignment.Start
                         ) {
                             HeaderBottomSheet()
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(327.dp)
-                                    .background(Color.White)
-                                    .verticalScroll(rememberScrollState()),
+                                    .wrapContentHeight()
+                                    .background(Color.White),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Spacer(
                                     modifier = Modifier
-                                        .height(20.dp)
+                                        .height(10.dp)
                                         .background(Color.White)
                                 )
 
@@ -167,14 +178,14 @@ fun PAVetDetail(
                                 )
                                 LazyRow(
                                     contentPadding = PaddingValues(
-                                        horizontal = 40.dp, vertical = 8.dp
+                                        horizontal = 40.dp, vertical = 6.dp
                                     ), horizontalArrangement = Arrangement.spacedBy(15.dp)
                                 ) {
                                     items(state.dataPets) { item ->
-                                        CardDateOfPet(data = item?.data,
-                                            "",
-                                            isSelected = selectedImage == item?.id.toString(),
-                                            onClick = { selectedImage = item?.id.toString() })
+                                        CardDateOfPet(data = item,
+                                            item.id ?: "",
+                                            isSelected = selectedImage == item.id.toString(),
+                                            onClick = { selectedImage = item.id.toString() })
                                     }
 
                                 }
@@ -188,7 +199,7 @@ fun PAVetDetail(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .width(282.dp)
-                                        .padding(vertical = 5.dp),
+                                        .padding(vertical = 4.dp),
                                     colors = TextFieldDefaults.outlinedTextFieldColors(
                                         focusedBorderColor = plata,
                                         unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
@@ -257,8 +268,8 @@ fun PAVetDetail(
                                 if (date.value.isNotEmpty()) {
                                     val availableTimes = generateAvailableTimes(
                                         dateString = date.value,
-                                        state.dataVet?.get("HInicio").toString(),
-                                        state.dataVet?.get("HFin").toString()
+                                        state.dataVet?.TimeStart ?: "08:00",
+                                        state.dataVet?.TimeEnd ?: "20:00"
                                     )
                                     OutlinedTextField(
                                         value = selectedTime,
@@ -318,43 +329,46 @@ fun PAVetDetail(
                                                 Toast.LENGTH_LONG
                                             ).show()
                                         }
-
                                     }
                                 }
-
-                            }
-                            Card(
-                                elevation = 1.dp,
-                                modifier = Modifier
-                                    .height(88.dp)
-                                    .fillMaxWidth()
-                                    .shadow(10.dp)
-                            ) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    ButtonDefault(modifier = Modifier
-                                        .align(alignment = Alignment.Center)
-                                        .height(48.dp)
-                                        .width(216.dp),
-                                        enabled = !enableButton, radius = 16.dp,
-                                        textButton = "Solicitar cita",
-                                        onClick = {
-                                            if (date.value.isNotEmpty() && selectedTime.isNotEmpty() && selectedProblem.isNotEmpty()) {
-                                                val timestamp = convertDateTimeToTimestamp(
-                                                    dateString = date.value,
-                                                    timeString = selectedTime.split(" ")[0]
-                                                )
-                                                viewModel.onEvent(
-                                                    PAVetDetailEvent.RegisterDate(
-                                                        day = timestamp,
-                                                        time = selectedTime,
-                                                        patient = selectedImage,
-                                                        reason = selectedProblem,
-                                                        idVet = vetDetail
+                                Card(
+                                    elevation = 1.dp,
+                                    modifier = Modifier
+                                        .height(88.dp)
+                                        .fillMaxWidth()
+                                        .shadow(10.dp)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        ButtonDefault(modifier = Modifier
+                                            .align(alignment = Alignment.Center)
+                                            .height(48.dp)
+                                            .width(216.dp),
+                                            enabled = !enableButton, radius = 16.dp,
+                                            textButton = "Solicitar cita",
+                                            onClick = {
+                                                if (date.value.isNotEmpty() && selectedTime.isNotEmpty() && selectedProblem.isNotEmpty() && selectedImage.isNotEmpty()) {
+                                                    val timestamp = convertDateTimeToTimestamp(
+                                                        dateString = date.value,
+                                                        timeString = selectedTime.split(" ")[0]
                                                     )
-                                                )
-                                                coroutine.launch { sheetState.hide() }
-                                            }
-                                        })
+                                                    viewModel.onEvent(
+                                                        PAVetDetailEvent.RegisterDate(
+                                                            day = timestamp,
+                                                            patient = selectedImage,
+                                                            reason = selectedProblem,
+                                                            idVet = vetDetail
+                                                        )
+                                                    )
+                                                    if (state.loadingRegister == false) {
+                                                        date.value = ""
+                                                        selectedTime = ""
+                                                        selectedProblem = ""
+                                                        selectedImage = ""
+                                                        coroutine.launch { sheetState.hide() }
+                                                    }
+                                                }
+                                            })
+                                    }
                                 }
                             }
                         }
@@ -392,7 +406,8 @@ fun PAVetDetail(
                         }
                     }
                     val images = listOf(
-                        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg",
+                        "https://cdn.forbes.com.mx/2014/12/mascotas.gif",
+                        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"
                     )
                     Text(
                         text = "Consultorio",
@@ -402,9 +417,10 @@ fun PAVetDetail(
                     )
 
                     Card(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(16.dp).height(200.dp),
                         shape = RoundedCornerShape(16.dp),
                     ) {
+
                         CarouselOfImages(
                             itemsCount = images.size,
                             itemContent = { index ->
@@ -420,7 +436,7 @@ fun PAVetDetail(
                         )
                     }
 
-                    listSpecialized(state.dataVet?.get("medical_specialties") as List<*>?)
+                    listSpecialized(state.dataVet?.listSpecialties as List<*>?)
 
                     Text(
                         text = "Ubicacion",
@@ -428,11 +444,12 @@ fun PAVetDetail(
                         fontWeight = FontWeight.Medium,
                         color = Purple200, modifier = Modifier.padding(vertical = 16.dp)
                     )
-                    if (location?.isComplete == true ){
-                        location?.let { it1 ->
-                            MyMap(modifier = Modifier.height(220.dp), positionLtLn = LatLng(
-                                state.dataVet?.get("Latitud") as Double, state.dataVet?.get("Longitud") as Double
-                            ), location = it1, nameBussines = state.dataVet!!["Nombre"].toString()
+                    if (location?.isComplete == true) {
+                        location?.let { myLocation ->
+                            MyMap(
+                                modifier = Modifier.height(220.dp), positionLtLn = LatLng(
+                                    state.dataVet?.lat as Double, state.dataVet?.long as Double
+                                ), location = myLocation, nameBussines = state.dataVet?.name ?: ""
                             )
                         }
                     }

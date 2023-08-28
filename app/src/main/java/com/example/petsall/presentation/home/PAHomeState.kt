@@ -1,9 +1,11 @@
 package com.example.petsall.presentation.home
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import com.example.petsall.data.remote.model.BusinessData
 import com.example.petsall.data.remote.model.PetData
 import com.example.petsall.data.remote.model.PetDateMedic
 import com.example.petsall.data.remote.model.UserDataClass
-import com.google.firebase.firestore.DocumentSnapshot
 
 data class PAHomeState(
     val loadingPets: Boolean = true,
@@ -15,7 +17,7 @@ data class PAHomeState(
     var numPets: Boolean = true,
     var dataPets: List<PetData>? = listOf(),
     var datePet: PetDateMedic? = null,
+    var datePets: List<PetDateMedic>? = listOf(),
     var isPetDelete: Boolean? = false,
-
-
+    var selectPet: MutableState<String> = mutableStateOf("")
     )

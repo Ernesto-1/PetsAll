@@ -32,12 +32,12 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                                 val locationValue = Location("location value.")
                                 if (event.location != null) {
                                     val filterCoordinates = result.data.filter {
-                                        locationValue.latitude = it?.data?.get("Latitud") as Double
-                                        locationValue.longitude = it.data?.get("Longitud") as Double
+                                        locationValue.latitude = it.lat
+                                        locationValue.longitude = it.long
                                         event.location.distanceTo(locationValue) < 10000
                                     }.sortedBy {
-                                        locationValue.latitude = it?.data?.get("Latitud") as Double
-                                        locationValue.longitude = it.data?.get("Longitud") as Double
+                                        locationValue.latitude = it.lat
+                                        locationValue.longitude = it.long
                                         event.location.distanceTo(locationValue)
                                     }
 

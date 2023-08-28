@@ -10,7 +10,7 @@ interface PAVetDetailRepo {
 
     suspend fun getVet(id: String):DocumentSnapshot
 
-    suspend fun registerDate(day: Timestamp?, time: String, patient: String, reason: String, idVet:String): Boolean
+    suspend fun registerDate(day: Timestamp?, patient: String, reason: String, idVet:String): Boolean?
 
     suspend fun getDataPets(): List<DocumentSnapshot?>
 

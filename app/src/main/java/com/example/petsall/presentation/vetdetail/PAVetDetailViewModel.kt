@@ -6,12 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.petsall.domain.changepets.PAChangePetsUseCase
 import com.example.petsall.domain.vetdetail.PAVetDetailUseCase
-import com.example.petsall.presentation.changepets.PAChangePetsEvent
 import com.example.petsall.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,7 +27,6 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
                             is Resource.Loading -> {}
                             is Resource.Success -> {
                                 state = state.copy(data = result.data.results)
-                                Log.d("rcytvybuknl", state.data.toString())
                             }
                             else -> {}
                         }
@@ -44,7 +40,7 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                state = state.copy(dataVet = result.data?.data)
+                                state = state.copy(dataVet = result.data)
                             }
                             else -> {}
                         }
@@ -66,11 +62,14 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
             }
             is PAVetDetailEvent.RegisterDate ->{
                 viewModelScope.launch {
-                    useCase.registerDate(day = event.day, time = event.time, patient = event.patient, reason = event.reason, idVet = event.idVet).collect() { result ->
+                    useCase.registerDate(day = event.day, patient = event.patient, reason = event.reason, idVet = event.idVet).collect() { result ->
                         when(result){
-                            is Resource.Loading -> {}
+                            is Resource.Loading -> {
+                                state = state.copy(loadingRegister = true )
+                            }
                             is Resource.Success -> {
-                                Log.d("RegisterDate", result.data.toString())
+
+                                state = state.copy(successRegister = result.data,loadingRegister = false )
                             }
                             is Resource.Failure -> {}
                             else -> {}

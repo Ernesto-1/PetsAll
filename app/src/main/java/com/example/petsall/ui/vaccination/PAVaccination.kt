@@ -1,6 +1,7 @@
 package com.example.petsall.ui.vaccination
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +44,6 @@ fun PAVaccination(
     viewModel: PAVaccinationViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-
     LaunchedEffect(Unit) {
         viewModel.onEvent(PAVaccinationEvent.GetVaccinationList(idUser = idUser, idPet = idPet))
     }

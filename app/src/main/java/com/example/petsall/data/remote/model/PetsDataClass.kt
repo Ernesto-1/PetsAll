@@ -12,7 +12,7 @@ data class PetData(
     val breed: String? = "",
     val img: String? = "",
     val id: String? = "",
-    val birthdate: Timestamp? = null,
+    val birthdate: Timestamp? = null
 )
 fun List<DocumentSnapshot?>.mapToPetsDataClass(): PetsDataClass {
     val petDataList = mapNotNull { documentSnapshot ->

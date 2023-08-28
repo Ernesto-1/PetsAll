@@ -3,7 +3,6 @@ package com.example.petsall.domain.home
 import android.util.Log
 import com.example.petsall.data.remote.model.*
 import com.example.petsall.utils.Resource
-import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -34,12 +33,13 @@ class PAHomeUseCase @Inject constructor(private val repository: PAHomeRepo) {
             }
         }
 
-    suspend fun getDatePet(idPet: String): Flow<Resource<List<PetDateMedic>?>> =
+    suspend fun getDatePet(): Flow<Resource<List<PetDateMedic>?>> =
         flow {
             emit(Resource.Loading())
             try {
-                val documentSnapshots = repository.getDatePet(idPet)
+                val documentSnapshots = repository.getDatePet()
                 val petsDateMedic = documentSnapshots.mapToDateMedicDataClass().datesMedic
+                Log.d("vgjbhknlmcase", petsDateMedic.toString())
                 emit(Resource.Success(petsDateMedic))
             } catch (e: Exception) {
                // emit(Resource.Failure(e))

@@ -1,51 +1,50 @@
 package com.example.petsall.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.petsall.ui.theme.BtnGreen2
-import com.example.petsall.ui.theme.Purple200
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
+import com.example.petsall.ui.theme.GreenLight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CarouselOfImages(
     modifier: Modifier = Modifier,
     autoSlideDuration: Long = 5000,
-    pagerState: PagerState = remember { PagerState() },
     itemsCount: Int,
     itemContent: @Composable (index: Int) -> Unit,
 ) {
+    val pagerState = rememberPagerState { itemsCount }
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+    var key by remember { mutableStateOf(false) }
 
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(key) {
+        val target = if (pagerState.currentPage < itemsCount - 1) pagerState.currentPage + 1 else 0
         delay(autoSlideDuration)
-        pagerState.animateScrollToPage((pagerState.currentPage + 1) % itemsCount)
+        pagerState.animateScrollToPage((target))
+        key = !key
     }
 
     Box(
         modifier = modifier.fillMaxWidth(),
     ) {
-        HorizontalPager(count = itemsCount, state = pagerState) { page ->
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
             itemContent(page)
         }
 
@@ -66,21 +65,22 @@ fun CarouselOfImages(
     }
 }
 
+
 @Composable
 fun DotsIndicator(
     modifier: Modifier = Modifier,
     totalDots: Int,
     selectedIndex: Int,
-    selectedColor: Color = BtnGreen2,
+    selectedColor: Color = GreenLight,
     unSelectedColor: Color = Color.Gray,
     dotSize: Dp
 ) {
-    LazyRow(
+    Row(
         modifier = modifier
             .wrapContentWidth()
             .wrapContentHeight()
     ) {
-        items(totalDots) { index ->
+        for (index in 0 until totalDots) {
             IndicatorDot(
                 color = if (index == selectedIndex) selectedColor else unSelectedColor,
                 size = dotSize
@@ -95,9 +95,7 @@ fun DotsIndicator(
 
 @Composable
 fun IndicatorDot(
-    modifier: Modifier = Modifier,
-    size: Dp,
-    color: Color
+    modifier: Modifier = Modifier, size: Dp, color: Color
 ) {
     Box(
         modifier = modifier

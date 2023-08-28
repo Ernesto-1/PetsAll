@@ -9,10 +9,10 @@ data class DateMedicDataClass(
 data class PetDateMedic(
     val status: String? = "",
     val reason: String? = "",
-    val patient: String? = "",
-    val idVet: String? = "",
-    val dateMedic: Timestamp? = null,
-)
+    val patient: String = "",
+    val idVet: String = "",
+    val dateMedic: Timestamp? = null)
+
 fun List<DocumentSnapshot?>.mapToDateMedicDataClass(): DateMedicDataClass {
     val petDateMedicList = mapNotNull { documentSnapshot ->
         documentSnapshot.petDateMedic()

@@ -1,10 +1,10 @@
 package com.example.petsall.domain.vetdetail
 
+import android.util.Log
+import com.example.petsall.data.remote.model.*
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.utils.Resource
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -21,17 +21,19 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
             }
         }
 
-    suspend fun getVet(id: String): Flow<Resource<DocumentSnapshot?>> =
+    suspend fun getVet(id: String): Flow<Resource<VetData?>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getVet(id = id)))
+                val documentSnapshot = repository.getVet(id = id)
+                val vetData = documentSnapshot.mapToVetData()
+                emit(Resource.Success(vetData))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))
             }
         }
 
-    suspend fun registerDate(day: Timestamp?, time: String, patient: String, reason: String, idVet:String): Flow<Resource<Boolean?>> =
+    suspend fun registerDate(day: Timestamp?,patient: String, reason: String, idVet:String): Flow<Resource<Boolean?>> =
         flow {
             emit(Resource.Loading())
             try {
@@ -39,7 +41,6 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
                     Resource.Success(
                         repository.registerDate(
                             day = day,
-                            time = time,
                             patient = patient,
                             reason = reason,
                             idVet = idVet
@@ -47,15 +48,18 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
                     )
                 )
             } catch (e: Exception) {
+                Log.d("bhnjkm", "registerDate: ")
                 emit(Resource.Failure(e))
             }
         }
 
-    suspend fun getPets(): Flow<Resource<List<DocumentSnapshot?>>> =
+    suspend fun getPets(): Flow<Resource<List<PetData>>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repository.getDataPets()))
+                val documentSnapshots = repository.getDataPets()
+                val petsData = documentSnapshots.mapToPetsDataClass().mascotas
+                emit(Resource.Success(petsData))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))
             }

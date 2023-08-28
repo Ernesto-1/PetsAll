@@ -8,8 +8,12 @@ import javax.inject.Inject
 class PAVetDataSource @Inject constructor(private val firebaseFirestore: FirebaseFirestore) {
 
     suspend fun getVet(): List<DocumentSnapshot?> {
-        val getVets = firebaseFirestore.collection("Consultorios").get().await()
-        return getVets.documents
+        val getVets = firebaseFirestore.collection("Consultorios")
+        return try {
+            val dataPets = getVets.get().await()
+            dataPets.documents
+        }catch(e: Exception)  {
+            emptyList()
+        }
     }
-
 }

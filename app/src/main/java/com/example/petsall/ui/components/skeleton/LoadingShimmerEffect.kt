@@ -12,124 +12,62 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.linearGradient
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.petsall.ui.theme.White
 
 @Composable
-fun LoadingShimmerEffect() {
-
-    val gradient = listOf(
-        Color.LightGray.copy(alpha = 0.9f), //darker grey (90% opacity)
-        Color.LightGray.copy(alpha = 0.3f), //lighter grey (30% opacity)
-        Color.LightGray.copy(alpha = 0.9f)
+fun NewShimmerSpacer(
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(50.dp)
+){
+    val colors = listOf(
+        Color(0xFFEAEAEA),
+        Color(0xFFF6F6F6),
+        Color(0xFFEAEAEA)
     )
 
-    val transition = rememberInfiniteTransition() // animate infinite times
 
-    val translateAnimation = transition.animateFloat( //animate the transition
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000, // duration for the animation
-                easing = FastOutLinearInEasing
+    val transition = rememberInfiniteTransition()
+
+    val shimmerWidthPercentage = 0.3f
+
+    BoxWithConstraints {
+        val spaceMaxWidth = with(LocalDensity.current) { maxWidth.toPx() }
+        val spaceMaxHeight = with(LocalDensity.current) { maxHeight.toPx() }
+
+        val translateAnim = transition.animateFloat(
+            initialValue = 0f,
+            targetValue = spaceMaxWidth * (1 + shimmerWidthPercentage),
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 1000,
+                    easing = FastOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Restart
             )
         )
-    )
-    val brush = linearGradient(
-        colors = gradient,
-        start = Offset(200f, 200f),
-        end = Offset(
-            x = translateAnimation.value,
-            y = translateAnimation.value
-        )
-    )
-    ShimmerGridItem(brush = brush)
-}
 
-@Composable
-fun ShimmerGridItem(
-    brush: Brush = linearGradient(
-        listOf(
-            Color.LightGray.copy(alpha = 0.9f),
-            Color.LightGray.copy(alpha = 0.4f),
-            Color.LightGray.copy(alpha = 0.9f)
+        val brush = Brush.linearGradient(
+            colors,
+            start = Offset(translateAnim.value - (spaceMaxWidth * shimmerWidthPercentage),spaceMaxHeight),
+            end = Offset(translateAnim.value,spaceMaxHeight)
         )
-    )
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(all = 10.dp), verticalAlignment = Alignment.Top
-    ) {
+
 
         Spacer(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(brush)
+            modifier = modifier
+                .background(brush = brush)
         )
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(verticalArrangement = Arrangement.Center) {
-            Spacer(
-                modifier = Modifier
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .fillMaxWidth(fraction = 0.5f)
-                    .background(brush)
-            )
 
-            Spacer(modifier = Modifier.height(10.dp)) //creates an empty space between
-            Spacer(
-                modifier = Modifier
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .fillMaxWidth(fraction = 0.7f)
-                    .background(brush)
-            )
-
-            Spacer(modifier = Modifier.height(10.dp)) //creates an empty space between
-            Spacer(
-                modifier = Modifier
-                    .height(20.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .fillMaxWidth(fraction = 0.9f)
-                    .background(brush)
-            )
-        }
     }
 }
 
-@Composable
-fun ImageTopSkeleton(
-    brush: Brush = linearGradient(
-        listOf(
-            Color.LightGray.copy(alpha = 0.9f),
-            Color.LightGray.copy(alpha = 0.4f),
-            Color.LightGray.copy(alpha = 0.9f)
-        )
-    )
-) {
-    Spacer(
-        modifier = Modifier
-            .height(50.dp)
-            .width(50.dp)
-            .clip(shape = RoundedCornerShape(50.dp))
-            .background(brush)
-    )
-}
 
 @Composable
-fun TopBarSkeleton(
-    brush: Brush = linearGradient(
-        listOf(
-            Color.LightGray.copy(alpha = 0.9f),
-            Color.LightGray.copy(alpha = 0.4f),
-            Color.LightGray.copy(alpha = 0.9f)
-        )
-    )
-) {
+fun TopBarSkeleton() {
     Column(
         modifier = Modifier
             .background(White)
@@ -139,12 +77,11 @@ fun TopBarSkeleton(
         Row(verticalAlignment = Alignment.CenterVertically) {
             ImageTopSkeleton()
             Spacer(modifier = Modifier.width(10.dp))
-            Spacer(
+            NewShimmerSpacer(
                 modifier = Modifier
                     .height(30.dp)
                     .clip(RoundedCornerShape(15.dp))
                     .fillMaxWidth(fraction = 0.4f)
-                    .background(brush)
             )
 
         }
@@ -152,10 +89,20 @@ fun TopBarSkeleton(
 }
 
 @Composable
+fun ImageTopSkeleton() {
+    NewShimmerSpacer(
+        modifier = Modifier
+            .height(50.dp)
+            .width(50.dp)
+            .clip(shape = RoundedCornerShape(50.dp))
+    )
+}
+
+
+@Composable
 @Preview(showBackground = true)
 fun ShimmerPreview() {
     Column(Modifier.fillMaxSize()) {
-        ShimmerGridItem()
         TopBarSkeleton()
     }
 }
