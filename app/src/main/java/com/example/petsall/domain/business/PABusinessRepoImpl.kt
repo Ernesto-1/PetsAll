@@ -5,5 +5,5 @@ import com.google.firebase.firestore.DocumentSnapshot
 import javax.inject.Inject
 
 class PABusinessRepoImpl @Inject constructor (private val datasource: PABusinessDatasource): PABusinessRepo {
-    override suspend fun getDataBusiness(): List<DocumentSnapshot?> = datasource.getDataBusiness()
+    override suspend fun getDataBusiness(nameListBusiness: String): List<DocumentSnapshot?> = datasource.getDataBusiness(nameListBusiness = nameListBusiness)
 }

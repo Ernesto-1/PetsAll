@@ -7,8 +7,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class PABusinessDatasource @Inject constructor(private val firebaseFirestore: FirebaseFirestore){
-    suspend fun getDataBusiness(): List<DocumentSnapshot?> {
-        val businessCollection = firebaseFirestore.collection("Negocios")
+    suspend fun getDataBusiness(nameListBusiness: String): List<DocumentSnapshot?> {
+        val businessCollection = firebaseFirestore.collection("Negocios").whereEqualTo(nameListBusiness,true)
 
         return try {
             val dataPets = businessCollection.get().await()

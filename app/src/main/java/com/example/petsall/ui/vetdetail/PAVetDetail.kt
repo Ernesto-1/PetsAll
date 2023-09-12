@@ -3,6 +3,7 @@ package com.example.petsall.ui.vetdetail
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -26,9 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +39,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.petsall.R
+import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.presentation.vetdetail.PAVetDetailEvent
 import com.example.petsall.presentation.vetdetail.PAVetDetailViewModel
 import com.example.petsall.ui.components.CarouselOfImages
@@ -59,7 +63,7 @@ import java.util.*
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun PAVetDetail(
-    vetDetail: String,
+    vetDetail: VetData,
     navController: NavController,
     viewModel: PAVetDetailViewModel = hiltViewModel()
 ) {
@@ -91,10 +95,11 @@ fun PAVetDetail(
     BackHandler {
         navController.navigateUp()
     }
+    Log.d("bhjkjnlkm", vetDetail.toString())
 
     LaunchedEffect(Unit) {
-        if (vetDetail.isNotEmpty()) {
-            viewModel.onEvent(PAVetDetailEvent.GetVet(vetDetail))
+        if (vetDetail.id.isNotEmpty()) {
+            //viewModel.onEvent(PAVetDetailEvent.GetVet(vetDetail))
             viewModel.onEvent(PAVetDetailEvent.GetDataPets(""))
         }
 
@@ -102,6 +107,9 @@ fun PAVetDetail(
             fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
                 location = loc
             }
+        }
+        if (checkPhonePermission(context)){
+
         }
     }
 
@@ -119,11 +127,11 @@ fun PAVetDetail(
     }
 
 
-    if (!state.dataVet?.id.isNullOrEmpty() && checkLocationPermission(context)) {
+    if (vetDetail.id.isNotEmpty() && checkLocationPermission(context)) {
         Scaffold(topBar = {
             TopAppBar(title = {
                 Text(
-                    text = state.dataVet?.name ?: "",
+                    text = vetDetail.name ?: "",
                     color = Snacbar,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -151,6 +159,7 @@ fun PAVetDetail(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .wrapContentHeight()
                             .wrapContentWidth(unbounded = false)
                             .wrapContentHeight(unbounded = true)
                     ) {
@@ -268,8 +277,8 @@ fun PAVetDetail(
                                 if (date.value.isNotEmpty()) {
                                     val availableTimes = generateAvailableTimes(
                                         dateString = date.value,
-                                        state.dataVet?.TimeStart ?: "08:00",
-                                        state.dataVet?.TimeEnd ?: "20:00"
+                                        vetDetail.TimeStart ?: "08:00",
+                                        vetDetail.TimeEnd ?: "20:00"
                                     )
                                     OutlinedTextField(
                                         value = selectedTime,
@@ -356,7 +365,7 @@ fun PAVetDetail(
                                                             day = timestamp,
                                                             patient = selectedImage,
                                                             reason = selectedProblem,
-                                                            idVet = vetDetail
+                                                            idVet = vetDetail.id
                                                         )
                                                     )
                                                     if (state.loadingRegister == false) {
@@ -386,14 +395,14 @@ fun PAVetDetail(
                             .padding(top = 25.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_background),
-                            contentDescription = "Image",
+                        AsyncImage(
+                            model = vetDetail.imgLogo.ifEmpty { R.drawable.ic_launcher_background },
+                            contentDescription = "ImageLogo",
+                            contentScale = ContentScale.FillWidth,
                             modifier = Modifier
-                                .height(110.dp)
-                                .width(110.dp)
-                                .clip(shape = RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.FillWidth
+                                .height(120.dp)
+                                .width(120.dp)
+                                .clip(shape = RoundedCornerShape(12.dp))
                         )
 
                         ButtonDefault(
@@ -405,28 +414,20 @@ fun PAVetDetail(
                             }
                         }
                     }
-                    val images = listOf(
-                        "https://cdn.forbes.com.mx/2014/12/mascotas.gif",
-                        "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"
-                    )
+
+                    if (vetDetail.listImages?.isNotEmpty() == true){
                     Text(
                         text = "Consultorio",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         color = Purple200
                     )
-
-                    Card(
-                        modifier = Modifier.padding(16.dp).height(200.dp),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-
                         CarouselOfImages(
-                            itemsCount = images.size,
+                            itemsCount = vetDetail.listImages.size ?: 0,
                             itemContent = { index ->
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
-                                        .data(images[index])
+                                        .data(vetDetail.listImages[index])
                                         .build(),
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
@@ -436,7 +437,15 @@ fun PAVetDetail(
                         )
                     }
 
-                    listSpecialized(state.dataVet?.listSpecialties as List<*>?)
+                    listSpecialized(vetDetail.listSpecialties as List<*>?, title = "Especialidades")
+                    listSpecialized(vetDetail.listSpecializedSector as List<*>?, title = "Atienden a")
+                    Text(
+                        text = "Contacto",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Purple200
+                    )
+                    PhoneNumber(phoneNumber = "5463546578", enable = checkPhonePermission(context))
 
                     Text(
                         text = "Ubicacion",
@@ -448,8 +457,8 @@ fun PAVetDetail(
                         location?.let { myLocation ->
                             MyMap(
                                 modifier = Modifier.height(220.dp), positionLtLn = LatLng(
-                                    state.dataVet?.lat as Double, state.dataVet?.long as Double
-                                ), location = myLocation, nameBussines = state.dataVet?.name ?: ""
+                                    vetDetail.lat, vetDetail.long
+                                ), location = myLocation, nameBussines = vetDetail.name ?: ""
                             )
                         }
                     }
@@ -458,4 +467,27 @@ fun PAVetDetail(
             }
         })
     }
+}
+
+@Composable
+fun PhoneNumber(phoneNumber: String,enable: Boolean = false) {
+    val context = LocalContext.current
+    val textColor = if (enable) GreenLight else Color.Gray
+
+    val text = buildAnnotatedString {
+        withStyle(style = SpanStyle(color = Color.Black)) {
+            append("Numero:")
+        }
+        withStyle(style = SpanStyle(color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
+            append(" $phoneNumber")
+        }
+    }
+
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)
+            .clickable { if (enable) makeACall(context = context, phoneNumber = phoneNumber) }
+    )
 }

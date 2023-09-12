@@ -38,6 +38,14 @@ fun CardDateOfPet(
                 .wrapContentSize()
                 .clickable(onClick = onClick), horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text =  "Seleccionado",
+                color = if (isSelected) borderColor else Color.Transparent,
+                fontSize = 10.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                fontWeight = FontWeight.SemiBold
+            )
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -25,7 +25,7 @@ class PABusinessListViewModel @Inject constructor(private val useCase: PABusines
         when (event) {
             is PABusinessListEvent.GetDataBusiness -> {
                 viewModelScope.launch {
-                    useCase.invoke().collect() { result ->
+                    useCase.invoke(nameListBusiness = event.nameListBusiness).collect() { result ->
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {

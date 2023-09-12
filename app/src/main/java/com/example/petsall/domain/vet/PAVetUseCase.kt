@@ -1,10 +1,8 @@
 package com.example.petsall.domain.vet
 
-import android.util.Log
 import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.data.remote.model.mapToListVetDataClass
 import com.example.petsall.utils.Resource
-import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

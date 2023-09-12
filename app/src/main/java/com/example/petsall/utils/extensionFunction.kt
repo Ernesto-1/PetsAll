@@ -3,12 +3,17 @@ package com.example.petsall.utils
 import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.widget.DatePicker
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.focus.FocusManager
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import com.example.petsall.data.remote.model.VetData
 import com.google.firebase.Timestamp
+import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
@@ -19,13 +24,19 @@ import java.util.*
 fun checkLocationPermission(context: Context): Boolean {
     val coarsePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
     val finePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+    val phonePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
     return coarsePermission == PackageManager.PERMISSION_GRANTED && finePermission == PackageManager.PERMISSION_GRANTED
+}
+fun checkPhonePermission(context: Context): Boolean {
+    val phonePermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+    return phonePermission == PackageManager.PERMISSION_GRANTED
 }
 val permissions = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.READ_EXTERNAL_STORAGE,
     Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    Manifest.permission.ACCESS_COARSE_LOCATION
+    Manifest.permission.ACCESS_COARSE_LOCATION,
+    Manifest.permission.CALL_PHONE
 
     )
 
@@ -124,4 +135,48 @@ fun convertDateTimeToTimestamp(dateString: String, timeString: String): Timestam
         e.printStackTrace()
         null
     }
+}
+
+fun <T> T.encodeJson(): String {
+    return Uri.encode(Gson().toJson(this))
+}
+
+inline fun <reified T> getObjectFromJson(json: String?): T? {
+    return Gson().fromJson(json, T::class.java)
+}
+
+fun getList(list: List<VetData>? = listOf()): List<String> {
+    val allSectors : MutableList<String> = mutableListOf()
+    allSectors.addAll(listOf("perros", "gatos"))
+    list?.map { coupon ->
+        coupon.listSpecializedSector?.map { it1 -> allSectors.add(it1 as String) }
+    }
+    return allSectors.distinct()
+}
+
+fun getListSpecialties(list: List<VetData>? = listOf()): List<String> {
+    val allSpecialties: MutableList<String> = mutableListOf()
+    list?.map { coupon ->
+        coupon.listSpecialties?.map { it1 -> allSpecialties.add(it1.toString()) }
+    }
+    return allSpecialties.distinct()
+}
+fun <T> isEqual(first: List<T>, second: List<T>): Boolean {
+    if (first.size != second.size) {
+        return false
+    }
+    return first.containsAll(second)
+}
+fun String.capitalizeName(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }
+}
+
+fun makeACall(context: Context, phoneNumber: String) {
+    val intent = Intent(Intent.ACTION_CALL)
+    intent.data = Uri.parse("tel: $phoneNumber")
+    ContextCompat.startActivity(context, intent, bundleOf())
 }

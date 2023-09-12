@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.example.petsall.ui.theme.GreenLight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.layout.ContentScale
@@ -41,26 +43,31 @@ fun CarouselOfImages(
         key = !key
     }
 
-    Box(
-        modifier = modifier.fillMaxWidth(),
+    Card(
+        modifier = modifier.padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            itemContent(page)
-        }
-
-        Surface(
-            modifier = Modifier
-                .padding(bottom = 8.dp)
-                .align(Alignment.BottomCenter),
-            shape = CircleShape,
-            color = Color.Black.copy(alpha = 0.5f)
+        Box(
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            DotsIndicator(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                totalDots = itemsCount,
-                selectedIndex = if (isDragged) pagerState.currentPage else pagerState.targetPage,
-                dotSize = 8.dp
-            )
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                itemContent(page)
+            }
+
+            Surface(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .align(Alignment.BottomCenter),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.5f)
+            ) {
+                DotsIndicator(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    totalDots = itemsCount,
+                    selectedIndex = if (isDragged) pagerState.currentPage else pagerState.targetPage,
+                    dotSize = 8.dp
+                )
+            }
         }
     }
 }

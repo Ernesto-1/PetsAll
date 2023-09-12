@@ -31,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.ui.business.PABusinessList
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
@@ -47,6 +48,8 @@ import com.example.petsall.ui.vaccination.PAVaccination
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
 import com.example.petsall.utils.BottomMenuViewModel
+import com.example.petsall.utils.getList
+import com.example.petsall.utils.getObjectFromJson
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
@@ -80,7 +83,11 @@ class MainActivity() : ComponentActivity() {
                     Menu(Route.PAHome, Icons.Filled.Home, "Inicio"),
                     Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
                     Menu(Route.PAEmergency, Icons.Filled.Warning, "Emergencia"),
-                    Menu(Route.PAExplore, ImageVector.vectorResource(id = R.drawable.explore), "Explora"),
+                    Menu(
+                        Route.PAExplore,
+                        ImageVector.vectorResource(id = R.drawable.explore),
+                        "Explora"
+                    ),
                     Menu(Route.PAPerfil, Icons.Filled.Person, "Perfil"),
                 )
                 Surface(
@@ -88,42 +95,60 @@ class MainActivity() : ComponentActivity() {
                 ) {
                     Scaffold(bottomBar = {
 
-                            val navBackStackEntry by navigationController.currentBackStackEntryAsState()
-                            val currentDestination = navBackStackEntry?.destination
-                            if (currentDestination?.route in listOf(
-                                    Route.PAHome, Route.PAEmergency, Route.PAVet, Route.PAPerfil,Route.PAExplore
-                                )
-                            ) {
-                                if (currentDestination?.route == Route.PAHome){
-                                    selectMenu = "Inicio"
-                                }
-                                BottomNavigation {
-                                    items.forEach { item ->
-                                        BottomNavigationItem(modifier = Modifier.background(Color.White),
-                                            icon = {
-                                                Icon(
-                                                    item.icon, contentDescription = null, tint = if (selectMenu == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE)
-                                                )
-                                            },
-                                            label = { Text(item.label, color = if (selectMenu  == item.label) Color(0xff84B1B8) else Color(0xffDEDEDE), fontSize = 10.sp) },
-                                            selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                                            onClick = {
-                                                if (user != null || item.route != Route.PALogin) {
-                                                    navigationController.navigate(item.route) {
-                                                        popUpTo(navigationController.graph.findStartDestination().id) {
-                                                            saveState = true
-                                                        }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                }
-                                                selectMenu = item.label
-                                            })
-                                    }
-                                }
-
+                        val navBackStackEntry by navigationController.currentBackStackEntryAsState()
+                        val currentDestination = navBackStackEntry?.destination
+                        if (currentDestination?.route in listOf(
+                                Route.PAHome,
+                                Route.PAEmergency,
+                                Route.PAVet,
+                                Route.PAPerfil,
+                                Route.PAExplore
+                            )
+                        ) {
+                            if (currentDestination?.route == Route.PAHome) {
+                                selectMenu = "Inicio"
                             }
-                        }) { innerPadding ->
+                            BottomNavigation {
+                                items.forEach { item ->
+                                    BottomNavigationItem(modifier = Modifier.background(Color.White),
+                                        icon = {
+                                            Icon(
+                                                item.icon,
+                                                contentDescription = null,
+                                                tint = if (selectMenu == item.label) Color(
+                                                    0xff84B1B8
+                                                ) else Color(0xffDEDEDE)
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                item.label,
+                                                color = if (selectMenu == item.label) Color(
+                                                    0xff84B1B8
+                                                ) else Color(
+                                                    0xffDEDEDE
+                                                ),
+                                                fontSize = 10.sp
+                                            )
+                                        },
+                                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                                        onClick = {
+                                            if (user != null || item.route != Route.PALogin) {
+                                                navigationController.navigate(item.route) {
+                                                    popUpTo(navigationController.graph.findStartDestination().id) {
+                                                        saveState = true
+                                                    }
+                                                    launchSingleTop = true
+                                                    restoreState = true
+                                                }
+                                            }
+                                            selectMenu = item.label
+                                        })
+                                }
+                            }
+
+                        }
+                    }) { innerPadding ->
                         NavHost(
                             navController = navigationController,
                             startDestination = if (user != null) Route.PAHome else Route.PALogin,
@@ -140,27 +165,33 @@ class MainActivity() : ComponentActivity() {
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
                             composable(Route.PAEmergency) { PAEmergency() }
-                            composable("${Route.PABusinessList}/{nameList}",
+                            composable(
+                                "${Route.PABusinessList}/{nameList}",
                                 arguments = listOf(navArgument("nameList") {
                                     type = NavType.StringType
                                 })
-                                ) { backStackEntry ->
-                                    PABusinessList(nameListBusiness = backStackEntry.arguments?.getString("nameList") ?: "",navController = navigationController)
-                                }
+                            ) { backStackEntry ->
+                                PABusinessList(
+                                    nameListBusiness = backStackEntry.arguments?.getString(
+                                        "nameList"
+                                    ) ?: "", navController = navigationController
+                                )
+                            }
                             composable(Route.PAExplore) { PAExplore(navController = navigationController) }
                             composable(
                                 "${Route.PAVaccinationCard}/{idUser}/{idPet}",
                                 arguments = listOf(navArgument("idUser") {
                                     type = NavType.StringType
-                                }, navArgument("idPet"){
+                                }, navArgument("idPet") {
                                     type = NavType.StringType
                                 }
                                 )
-                            ){ backStackEntry ->
-                                    PAVaccination(
-                                        idUser =  backStackEntry.arguments?.getString("idUser") ?: "",
-                                        idPet = backStackEntry.arguments?.getString("idPet") ?: "",
-                                        navController = navigationController)
+                            ) { backStackEntry ->
+                                PAVaccination(
+                                    idUser = backStackEntry.arguments?.getString("idUser") ?: "",
+                                    idPet = backStackEntry.arguments?.getString("idPet") ?: "",
+                                    navController = navigationController
+                                )
                             }
                             composable(Route.PANewPet) { PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
@@ -178,17 +209,18 @@ class MainActivity() : ComponentActivity() {
                                 }
                             }
                             composable(
-                                "${Route.PAVetDetail}/{vetId}",
-                                arguments = listOf(navArgument("vetId") {
+                                "${Route.PAVetDetail}/{dataVet}",
+                                arguments = listOf(navArgument("dataVet") {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                backStackEntry.arguments?.getString("vetId")?.let {
+                                getObjectFromJson<VetData>(backStackEntry.arguments?.getString("dataVet") )?.let {
                                     PAVetDetail(
                                         vetDetail = it,
                                         navController = navigationController,
                                     )
                                 }
+
                             }
 
 

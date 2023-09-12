@@ -9,11 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.petsall.domain.vet.PAVetUseCase
 import com.example.petsall.utils.Resource
-import com.google.firebase.firestore.DocumentSnapshot
+import com.example.petsall.utils.getList
+import com.example.petsall.utils.getListSpecialties
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.log
 
 @HiltViewModel
 class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : ViewModel() {
@@ -23,7 +23,7 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
 
     fun onEvent(event: PAVetEvent) {
         when (event) {
-            is PAVetEvent.GetDataUser -> {
+            is PAVetEvent.GetDataVet -> {
                 viewModelScope.launch {
                     useCase.invoke().collect() { result ->
                         when (result) {
@@ -41,9 +41,9 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                                         event.location.distanceTo(locationValue)
                                     }
 
-                                    state = state.copy(data = filterCoordinates)
+                                    state = state.copy(dataVet = filterCoordinates,listSector = getList(filterCoordinates), listSpecialties = getListSpecialties(filterCoordinates))
                                 }else{
-                                    state = state.copy(data = listOf())
+                                    state = state.copy(dataVet = listOf())
                                 }
                             }
                             else -> {}

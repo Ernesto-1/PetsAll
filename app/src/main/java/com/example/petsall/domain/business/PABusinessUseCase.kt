@@ -9,12 +9,12 @@ import javax.inject.Inject
 
 class PABusinessUseCase @Inject constructor(private val repository: PABusinessRepo)  {
 
-    suspend operator fun invoke(): Flow<Resource<List<BusinessData>>> =
+    suspend operator fun invoke(nameListBusiness: String): Flow<Resource<List<BusinessData>>> =
         flow{
             emit(Resource.Loading())
             try {
 
-                val documentSnapshots = repository.getDataBusiness()
+                val documentSnapshots = repository.getDataBusiness(nameListBusiness = nameListBusiness)
                 val businessData = documentSnapshots.mapToListBusinessDataClass().listBusiness
                 emit(Resource.Success(businessData))
             } catch (e: Exception) {

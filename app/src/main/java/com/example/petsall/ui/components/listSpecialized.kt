@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -18,15 +19,15 @@ import com.example.petsall.ui.theme.Purple200
 
 @Preview(showBackground = true)
 @Composable
-fun listSpecialized(list: List<*>? = null) {
+fun listSpecialized(list: List<*>? = null,title: String = "") {
     if (!list.isNullOrEmpty()) {
         Text(
-            text = "Especialidades",
+            text = title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = Purple200
         )
-        Column(Modifier.padding(vertical = 12.dp)) {
+        Column(Modifier.padding(vertical = 12.dp, horizontal = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             GSPRMFlexLayout(verticalGap = 16.dp, horizontalGap = 8.dp) {
                 list.forEach { Specialties ->
                     Card(

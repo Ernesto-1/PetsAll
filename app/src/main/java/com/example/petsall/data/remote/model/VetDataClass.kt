@@ -13,10 +13,13 @@ fun DocumentSnapshot?.mapToVetData(): VetData? {
     val timeEnd = getString("HFin") ?: ""
     val status = getString("status") ?: ""
     val id = getString("Id") ?: ""
+    val number = getString("Numero") ?: ""
+    val imgLogo = getString("imgLogo") ?: ""
     val listSpecialties: ArrayList<*>? = get("medical_specialties") as? ArrayList<*>
+    val listImages: ArrayList<*>? = get("Imagenes") as? ArrayList<*>
     val listSpecializedSector: ArrayList<*>? = get("specialized_sector") as? ArrayList<*>
 
-    return VetData(name = name,lat = lat, long = long, TimeStart = timeStart, TimeEnd = timeEnd, id = id,status = status,listSpecialties = listSpecialties,listSpecializedSector = listSpecializedSector)
+    return VetData(name = name,lat = lat, long = long, TimeStart = timeStart, TimeEnd = timeEnd, id = id, number = number,status = status,listSpecialties = listSpecialties, listImages = listImages,listSpecializedSector = listSpecializedSector, imgLogo = imgLogo)
 }
 
 

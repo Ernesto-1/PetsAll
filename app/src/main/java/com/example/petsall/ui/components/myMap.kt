@@ -51,8 +51,8 @@ fun MyMap(modifier: Modifier = Modifier, positionLtLn: LatLng, location: Locatio
             .background(Color.White)
             .clip(
                 RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 0.dp,
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
                     bottomStart = 16.dp,
                     bottomEnd = 16.dp
                 )
@@ -61,7 +61,7 @@ fun MyMap(modifier: Modifier = Modifier, positionLtLn: LatLng, location: Locatio
         elevation = 5.dp
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
             cameraPositionState = cameraPositionState,
             uiSettings = uiSettings,
             properties = MapProperties(
