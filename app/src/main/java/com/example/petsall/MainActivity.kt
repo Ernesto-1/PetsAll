@@ -36,6 +36,7 @@ import com.example.petsall.ui.business.PABusinessList
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
 import com.example.petsall.ui.explore.PAExplore
+import com.example.petsall.ui.files.PAFiles
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.login.PALogin
@@ -193,6 +194,18 @@ class MainActivity() : ComponentActivity() {
                                     navController = navigationController
                                 )
                             }
+                            composable(
+                                "${Route.PAFiles}/{idPet}",
+                                arguments = listOf(navArgument("idPet") {
+                                    type = NavType.StringType
+                                }
+                                )
+                            ) { backStackEntry ->
+                                PAFiles(
+                                    idPet = backStackEntry.arguments?.getString("idPet") ?: "",
+                                    navController = navigationController
+                                )
+                            }
                             composable(Route.PANewPet) { PANewPet(navController = navigationController) }
                             composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
                             composable(
@@ -214,7 +227,7 @@ class MainActivity() : ComponentActivity() {
                                     type = NavType.StringType
                                 })
                             ) { backStackEntry ->
-                                getObjectFromJson<VetData>(backStackEntry.arguments?.getString("dataVet") )?.let {
+                                getObjectFromJson<VetData>(backStackEntry.arguments?.getString("dataVet"))?.let {
                                     PAVetDetail(
                                         vetDetail = it,
                                         navController = navigationController,

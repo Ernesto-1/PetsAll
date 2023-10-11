@@ -11,7 +11,7 @@ class PAVaccinationDataSource @Inject constructor(private val firebaseFirestore:
         val vaccination =
             firebaseFirestore.collection("Users").document(idUser).collection("Mascotas")
                 .document(idPet).collection("Cartilla")
-                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .orderBy("Fecha_vacunacion", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .get().await()
         return vaccination.documents
     }

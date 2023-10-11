@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
@@ -25,6 +25,7 @@ import com.example.petsall.R
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.theme.Snacbar
 import com.example.petsall.ui.theme.White
+import com.example.petsall.utils.encodeJson
 
 data class CardItem(val id: Int, val imageRes: Int, val nameCard: String)
 
@@ -35,6 +36,10 @@ fun PAExplore(navController: NavController) {
         CardItem(2, R.drawable.alimento, "Alimento"),
         CardItem(3, R.drawable.accesorios, "Accesorios")
     )
+    var clicked by remember { mutableStateOf(false) }
+    if (clicked) {
+        clicked = false
+    }
     Column(Modifier.fillMaxSize()) {
         LazyColumn {
             item {
@@ -51,7 +56,10 @@ fun PAExplore(navController: NavController) {
             }
             items(cardItems) { card ->
                 CardExploreOptions(card = card){
-                    navController.navigate("${Route.PABusinessList}/${card.nameCard}")
+                    if (!clicked) {
+                        navController.navigate("${Route.PABusinessList}/${card.nameCard}")
+                        clicked = !clicked
+                    }
                 }
             }
         }

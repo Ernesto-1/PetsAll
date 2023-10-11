@@ -115,7 +115,7 @@ fun convertStringToTimestamp(dateString: String): Timestamp? {
 
 fun convertTimestampToString(timestamp: Timestamp): String {
     val date = timestamp.toDate()
-    val dateFormat = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("d 'de' MMMM 'del' yyyy", Locale.getDefault())
     return dateFormat.format(date)
 }
 fun convertTimestampToString2(timestamp: Timestamp): String {

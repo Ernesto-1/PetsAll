@@ -36,7 +36,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.petsall.MainActivity
 import com.example.petsall.R
-import com.example.petsall.data.remote.model.PetDateMedic
 import com.example.petsall.presentation.home.PAHomeEvent
 import com.example.petsall.presentation.home.PAHomeViewModel
 import com.example.petsall.ui.changepet.CardChangePet
@@ -373,7 +372,9 @@ fun PAHome(
                         txtCard = "Expediente",
                         colorIcon = Color(0xff78CEFF),
                         modifier = Modifier.weight(1f)
-                    )
+                    ){
+                        navController.navigate("${Route.PAFiles}/${state.dataPet?.id}")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(25.dp))

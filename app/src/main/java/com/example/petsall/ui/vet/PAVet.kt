@@ -44,16 +44,20 @@ fun PAVet(
         LocationServices.getFusedLocationProviderClient(context)
     val state = viewModel.state
     var location by remember { mutableStateOf<Location?>(null) }
-    val items: MutableList<String> = viewModel.state.selectedSector.value.toMutableList()
-    val itemsSector: MutableList<String> = viewModel.state.selectedSectorTemp.value.toMutableList()
+    val items: MutableList<String> = state.selectedSector.value.toMutableList()
+    val itemsSector: MutableList<String> = state.selectedSectorTemp.value.toMutableList()
     val itemsSpecialties: MutableList<String> =
-        viewModel.state.selectedSpecialtiesTemp.value.toMutableList()
+        state.selectedSpecialtiesTemp.value.toMutableList()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val coroutine = rememberCoroutineScope()
     val enableButton = isEqual(
         state.selectedSectorTemp.value,
         state.selectedSector.value
     ) && isEqual(state.selectedSpecialtiesTemp.value, state.selectedSpecialties.value)
+    var clicked by remember { mutableStateOf(false) }
+    if (clicked) {
+        clicked = false
+    }
 
     LaunchedEffect(Unit) {
         if (checkLocationPermission(context)) {
@@ -136,7 +140,9 @@ fun PAVet(
                             )
                             state.selectedSector.value = items
                             state.dataVetFilter = state.dataVet.filter { vetData ->
-                                vetData.listSpecializedSector?.any { it in state.selectedSector.value } == true
+                                val sectoresEspecialidades = (vetData.listSpecializedSector
+                                    ?: emptyList()) + (vetData.listSpecialties ?: emptyList())
+                                sectoresEspecialidades.any { it in state.selectedSector.value || it in state.selectedSpecialties.value }
                             }
 
                         }) {
@@ -145,7 +151,8 @@ fun PAVet(
                                 state.selectedSectorTemp.value = state.selectedSector.value
                             }
                             if (state.selectedSpecialties.value != state.selectedSpecialtiesTemp.value) {
-                                state.selectedSpecialtiesTemp.value = state.selectedSpecialties.value
+                                state.selectedSpecialtiesTemp.value =
+                                    state.selectedSpecialties.value
                             }
                             sheetState.show()
                         }
@@ -154,7 +161,11 @@ fun PAVet(
                         items(if (state.selectedSector.value.isEmpty() && state.selectedSpecialties.value.isEmpty()) state.dataVet else state.dataVetFilter) { item ->
                             location?.let {
                                 CardVet(data = item, id = item.id, location = it) {
-                                    navController.navigate("${Route.PAVetDetail}/${item.encodeJson()}")
+                                    if (!clicked) {
+                                        navController.navigate("${Route.PAVetDetail}/${item.encodeJson()}")
+                                        clicked = !clicked
+                                    }
+
                                 }
                             }
                         }

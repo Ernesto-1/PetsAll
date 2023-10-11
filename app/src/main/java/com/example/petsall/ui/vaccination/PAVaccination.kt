@@ -1,7 +1,6 @@
 package com.example.petsall.ui.vaccination
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import com.example.petsall.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -29,9 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.petsall.data.remote.model.VaccineDataClass
 import com.example.petsall.presentation.vaccination.PAVaccinationEvent
 import com.example.petsall.presentation.vaccination.PAVaccinationViewModel
 import com.example.petsall.ui.theme.*
+import com.example.petsall.utils.capitalizeName
 import com.example.petsall.utils.convertTimestampToString
 import com.google.firebase.Timestamp
 
@@ -74,7 +74,7 @@ fun PAVaccination(
                 .fillMaxSize()
                 .padding(top = 10.dp)) {
                 items(state.data) {
-                    CardVaccine(data = it?.data)
+                    CardVaccine(data = it)
                 }
 
             }
@@ -87,14 +87,14 @@ fun PAVaccination(
 
 @Preview(showBackground = true)
 @Composable
-fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()) {
-    val colorStatus: Color = when (data?.get("status")?.toString()) {
+fun CardVaccine(modifier: Modifier = Modifier, data: VaccineDataClass? = VaccineDataClass()) {
+    val colorStatus: Color = when (data?.status) {
         "pendiente" -> statusEarring
         "vencido" -> statusDefeated
         "vigente" -> statusCurrent
         else -> statusEarring
     }
-    val date = convertTimestampToString(data?.get("date") as Timestamp)
+    val date = convertTimestampToString(data?.dateVaccine as Timestamp)
     Card(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -121,7 +121,7 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = if (data["type"]?.toString() == "vacuna") painterResource(id = R.drawable.vaccinee) else painterResource(id = R.drawable.medicines),
+                    painter = if (data.type == "vacuna") painterResource(id = R.drawable.vaccinee) else painterResource(id = R.drawable.medicines),
                     contentDescription = "Image",
                     modifier = Modifier
                         .fillMaxSize(),
@@ -139,7 +139,6 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                         .fillMaxWidth()
                         .fillMaxWidth(), horizontalArrangement = Arrangement.End
                 ) {
-                    val newStatusName = data["status"]?.toString() ?: ""
                     val contrastColor = getContrastingColor(colorStatus)
 
                     Box(
@@ -157,7 +156,7 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                             .height(27.dp)
                     ) {
                         Text(
-                            text = newStatusName,
+                            text = data.status.capitalizeName(),
                             modifier = Modifier.padding(
                                 horizontal = 16.dp,
                                 vertical = 3.dp
@@ -174,7 +173,7 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                         .padding(top = 8.dp)
                 ) {
                     Text(
-                        text = data["vaccine"]?.toString() ?: "",
+                        text = data.vaccine,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start,
                         maxLines = 2,
@@ -191,7 +190,7 @@ fun CardVaccine(modifier: Modifier = Modifier, data: Map<String, Any>? = mapOf()
                         style = TextStyle.Default
                     )
                     Text(
-                        text = "Ced. Prof." + data["PLicense"]?.toString(),
+                        text = "Ced. Prof." + data.pLicense,
                         modifier = Modifier.padding(top = 4.dp),
                         textAlign = TextAlign.Start,
                         maxLines = 1,

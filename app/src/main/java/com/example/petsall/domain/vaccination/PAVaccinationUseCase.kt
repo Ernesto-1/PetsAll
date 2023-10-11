@@ -1,5 +1,9 @@
 package com.example.petsall.domain.vaccination
 
+import android.util.Log
+import com.example.petsall.data.remote.model.VaccineDataClass
+import com.example.petsall.data.remote.model.mapToListVaccineDataClass
+import com.example.petsall.data.remote.model.mapTouserDataClass
 import com.example.petsall.utils.Resource
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.flow.Flow
@@ -8,11 +12,15 @@ import javax.inject.Inject
 
 class PAVaccinationUseCase @Inject constructor(private val repo: PAVaccinationRepo) {
 
-    suspend operator fun invoke(idUser:String,idPet:String): Flow<Resource<List<DocumentSnapshot?>>> =
+    suspend operator fun invoke(idUser:String,idPet:String): Flow<Resource<List<VaccineDataClass?>>> =
         flow {
             emit(Resource.Loading())
             try {
-                emit(Resource.Success(repo.getVaccinationList(idUser = idUser, idPet = idPet)))
+                val documentSnapshot = repo.getVaccinationList(idUser = idUser, idPet = idPet)
+                Log.d("hvgbjknlmñ1", repo.getVaccinationList(idUser = idUser, idPet = idPet).toString())
+                val vaccineData = documentSnapshot.mapToListVaccineDataClass().vaccines
+                Log.d("hvgbjknlmñ", vaccineData.toString())
+                emit(Resource.Success(vaccineData))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))
             }
