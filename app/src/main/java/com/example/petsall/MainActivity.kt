@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -42,6 +41,7 @@ import com.example.petsall.ui.newPet.PANewPet
 import com.example.petsall.ui.perfil.PAProfile
 import com.example.petsall.ui.signup.PASignUp
 import com.example.petsall.ui.theme.PetsAllTheme
+import com.example.petsall.ui.theme.stItems
 import com.example.petsall.ui.vaccination.PAVaccination
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
@@ -118,13 +118,14 @@ class MainActivity() : ComponentActivity() {
                                         },
                                         label = {
                                             Text(
-                                                item.label,
-                                                color = if (selectMenu == item.label) Color(
-                                                    0xff84B1B8
-                                                ) else Color(
-                                                    0xffDEDEDE
+                                                text = item.label,
+                                                style = stItems.copy(
+                                                    color = if (selectMenu == item.label) Color(
+                                                        0xff84B1B8
+                                                    ) else Color(
+                                                        0xffDEDEDE
+                                                    )
                                                 ),
-                                                fontSize = 10.sp
                                             )
                                         },
                                         selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,

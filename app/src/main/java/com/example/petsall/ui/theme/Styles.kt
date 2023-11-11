@@ -45,3 +45,11 @@ val stMessages = TextStyle(
     fontWeight = FontWeight.Bold,
     textAlign = TextAlign.Center,
 )
+
+val stItems = TextStyle(
+    color = PAGray,
+    fontSize = 10.sp,
+    fontFamily = fontPA,
+    fontWeight = FontWeight.Bold,
+    textAlign = TextAlign.Center,
+)

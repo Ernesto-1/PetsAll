@@ -8,7 +8,7 @@ import com.example.petsall.data.remote.model.PetDateMedic
 import com.example.petsall.data.remote.model.UserDataClass
 
 data class PAHomeState(
-    val loadingPets: Boolean = true,
+    val loadingPets: Boolean = false,
     val error: Boolean = false,
     var message: String = "",
     var success: Boolean = false,

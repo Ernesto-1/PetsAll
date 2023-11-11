@@ -112,7 +112,7 @@ fun PAHome(
         if (state.isPetDelete == true) {
             sheetState.hide()
             Toast.makeText(
-                context, "Se elimino exitosamente de tu lista", Toast.LENGTH_LONG
+                context, "Se eliminó exitosamente de tu lista", Toast.LENGTH_LONG
             ).show()
             state.selectPet.value = ""
             state.isPetDelete = false
