@@ -10,5 +10,6 @@ class PAHomeRepoImpl @Inject constructor(private val datasource: PAHomeDatasourc
     override suspend fun getDatePet(): List<DocumentSnapshot?> = datasource.getDatePet()
     override suspend fun deleteDataPet(idPet: String): Boolean = datasource.deleteDataPet(idPet = idPet)
     override suspend fun updateStatusDate(idPet: String): Boolean = datasource.updateStatusDate(idPet = idPet)
+    override suspend fun deletePetQuote(idPet: String): Boolean = datasource.deletePetQuote(idPet = idPet)
 
 }

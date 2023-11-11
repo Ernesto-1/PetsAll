@@ -113,9 +113,7 @@ fun PAHome(
     }
 
     LaunchedEffect(key1 = state.onChangeDate, key2 = state.datePet?.id) {
-        Log.i("TAG_vet", "PAHome: entra al onchange ${state.onChangeDate}")
-        if(state.onChangeDate){
-            Log.i("TAG_vet", "PAHome: get again date ")
+        if (state.onChangeDate) {
             viewModel.onEvent(PAHomeEvent.GetDataPets(state.datePet?.patient))
         }
     }
@@ -315,6 +313,10 @@ fun PAHome(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (state.loadingPets) {
+                    LoadingDialog {}
+                }
+
                 Text(
                     text = "Hola ${state.dataUser?.name}!",
                     modifier = Modifier
@@ -334,7 +336,7 @@ fun PAHome(
                             viewModel.onEvent(PAHomeEvent.UpdateStatusDate(state.datePet?.id ?: ""))
                         }
                         StatusDate.Cancel -> {
-
+                            viewModel.onEvent(PAHomeEvent.DeleteDateQuote(state.datePet?.id ?: ""))
                         }
                     }
                 }

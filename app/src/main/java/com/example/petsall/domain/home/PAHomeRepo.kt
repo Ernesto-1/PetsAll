@@ -10,5 +10,6 @@ interface PAHomeRepo {
     suspend fun getDatePet(): List<DocumentSnapshot?>
     suspend fun deleteDataPet(idPet: String): Boolean
     suspend fun updateStatusDate(idPet: String): Boolean
+    suspend fun deletePetQuote(idPet: String): Boolean
 
 }

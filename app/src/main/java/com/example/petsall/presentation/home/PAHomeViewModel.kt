@@ -88,7 +88,6 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                Log.d("deletpets", result.data.toString())
                                 state = state.copy(isPetDelete = result.data)
                             }
                             else -> {}
@@ -100,12 +99,37 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                 viewModelScope.launch {
                     useCase.updateStatusDate(event.idPet).collect() { result ->
                         when (result) {
-                            is Resource.Loading -> {}
+                            is Resource.Loading -> {
+                                state = state.copy(
+                                    loadingPets = true
+                                )
+                            }
                             is Resource.Success -> {
-                                Log.d("TAG_vet", "status::" + result.data.toString())
                                 state = state.copy(
                                     onChangeDate = result.data ?: false,
-                                    datePet = state.datePet?.copy(id = "")
+                                    datePet = state.datePet?.copy(id = ""),
+                                    loadingPets = false
+                                )
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+            }
+            is PAHomeEvent.DeleteDateQuote -> {
+                viewModelScope.launch {
+                    useCase.deleteDateQuote(event.idPet).collect() { result ->
+                        when (result) {
+                            is Resource.Loading -> {
+                                state = state.copy(
+                                    loadingPets = true
+                                )
+                            }
+                            is Resource.Success -> {
+                                state = state.copy(
+                                    onChangeDate = result.data ?: false,
+                                    datePet = state.datePet?.copy(id = ""),
+                                    loadingPets = false
                                 )
                             }
                             else -> {}

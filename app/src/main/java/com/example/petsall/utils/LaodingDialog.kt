@@ -3,16 +3,11 @@ package com.example.petsall.utils
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -29,7 +24,6 @@ import com.example.petsall.R
 
 @Composable
 fun LoadingDialog(onDismiss: () -> Unit) {
-
     Dialog(
         onDismissRequest = { onDismiss.invoke() },
         properties = DialogProperties(
@@ -39,7 +33,9 @@ fun LoadingDialog(onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .padding(start = 42.dp, end = 42.dp, top = 36.dp, bottom = 36.dp)
-                .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
+                .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+                .height(220.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -56,13 +52,15 @@ fun LoadingDialog(onDismiss: () -> Unit) {
                 .build()
             Image(
                 painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(context).data(data = R.drawable.output_onlinegiftools)
+                    ImageRequest.Builder(context).data(data = R.drawable.loading_huellitas)
                         .apply(block = {
                             size(Size.ORIGINAL)
                         }).build(), imageLoader = imageLoader
                 ),
                 contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .fillMaxWidth(),
             )
         }
     }

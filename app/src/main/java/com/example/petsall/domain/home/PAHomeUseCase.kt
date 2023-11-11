@@ -59,4 +59,13 @@ class PAHomeUseCase @Inject constructor(private val repository: PAHomeRepo) {
             emit(Resource.Failure(e))
         }
     }
+
+    suspend fun deleteDateQuote(idPet: String): Flow<Resource<Boolean?>> = flow {
+        emit(Resource.Loading())
+        try {
+            emit(Resource.Success(repository.deletePetQuote(idPet = idPet)))
+        } catch (e: Exception) {
+            emit(Resource.Failure(e))
+        }
+    }
 }

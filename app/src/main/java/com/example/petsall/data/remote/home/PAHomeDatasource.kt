@@ -84,19 +84,35 @@ class PAHomeDatasource @Inject constructor(
     suspend fun updateStatusDate(
         idPet: String
     ): Boolean {
-        Log.i("TAG_vet", "updateStatusDate: success $idPet")
         var upd = false
-        try {
+        return try {
             firebaseFirestore.collection("Citas")
                 .document(idPet)
                 .update("status", STATUS_CONFIRMED)
                 .addOnSuccessListener {
                     upd = true
-                    Log.i("TAG_vet", "updateStatusDate: success")
                 }.addOnFailureListener {
                     upd = false
-                    Log.i("TAG_vet", "updateStatusDate: failure ${it.message}")
+                }.await()
+            upd
+        } catch (e: Exception) {
+            Log.e("registerDate", "Error adding appointment", e)
+            false
+        }
+    }
 
+    suspend fun deletePetQuote(
+        idPet: String
+    ): Boolean {
+        var upd = false
+        try {
+            firebaseFirestore.collection("Citas")
+                .document(idPet)
+                .delete()
+                .addOnSuccessListener {
+                    upd = true
+                }.addOnFailureListener {
+                    upd = false
                 }.await()
             return upd
         } catch (e: Exception) {
