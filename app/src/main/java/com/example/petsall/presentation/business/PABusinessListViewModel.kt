@@ -29,7 +29,6 @@ class PABusinessListViewModel @Inject constructor(private val useCase: PABusines
                         when (result) {
                             is Resource.Loading -> {}
                             is Resource.Success -> {
-                                Log.d("fgcvhbjknlm", result.data.toString())
                                 state = state.copy(dataBusiness = result.data)
                             }
                             else -> {}

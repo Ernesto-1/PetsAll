@@ -107,6 +107,7 @@ fun PAProposalStatus(data: PetDateMedic?, patient: String, onClick: (StatusDate)
             Text(
                 text = String.format(
                     stringResource(id = R.string.home_message_proposal),
+                    data.nameVet,
                     patient,
                     datePet
                 ),

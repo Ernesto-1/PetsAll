@@ -36,10 +36,8 @@ class PALoginViewModel @Inject constructor(private val useCase: PALogginUseCase)
                                 state = state.copy(
                                     success = true
                                 )
-                                Log.d("vgbhnjmk", result.data?.uid.toString())
                             }
                             is Resource.Failure -> {
-                                Log.d("rftyghuj", result.exception.message.toString())
                                 state =
                                     if (result.exception.message?.contains("The password is invalid or the user does not have a password") == true || result.exception.message?.contains("There is no user record corresponding to this identifier") == true  ) {
                                         state.copy(
@@ -68,14 +66,13 @@ class PALoginViewModel @Inject constructor(private val useCase: PALogginUseCase)
         try {
             auth.signInWithCredential(credential).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d("tyhufhgj", task.toString())
 
                 }
             }.addOnFailureListener { error ->
-                Log.d("tyhufhgj", error.toString())
+
             }
         } catch (e: Exception) {
-            Log.d("tyhufhgj", e.toString())
+            Log.d("TAG_LOGIN", e.toString())
         }
     }
 

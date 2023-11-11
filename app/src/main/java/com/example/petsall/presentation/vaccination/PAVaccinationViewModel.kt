@@ -29,7 +29,6 @@ class PAVaccinationViewModel @Inject constructor(private val useCase: PAVaccinat
                             is Resource.Loading -> {}
                             is Resource.Success -> {
                                 state = state.copy(data = result.data)
-                                Log.d("CartillaVacunacion", state.data.toString())
                             }
                             else -> {}
                         }

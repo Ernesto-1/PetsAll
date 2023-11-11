@@ -36,7 +36,7 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
             }
         }
 
-    suspend fun registerDate(day: Timestamp?,patient: String, reason: String, idVet:String): Flow<Resource<Boolean?>> =
+    suspend fun registerDate(day: Timestamp?,patient: String, reason: String, idVet:String, vetName: String): Flow<Resource<Boolean?>> =
         flow {
             emit(Resource.Loading())
             try {
@@ -46,7 +46,8 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
                             day = day,
                             patient = patient,
                             reason = reason,
-                            idVet = idVet
+                            idVet = idVet,
+                            vetName = vetName
                         )
                     )
                 )

@@ -1,6 +1,5 @@
 package com.example.petsall.presentation.vetdetail
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +12,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailUseCase) : ViewModel() {
+class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailUseCase) :
+    ViewModel() {
 
     var state by mutableStateOf(PAVetDetailState())
         private set
@@ -34,7 +34,7 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
                 }
 
             }
-            is PAVetDetailEvent.GetVet ->{
+            is PAVetDetailEvent.GetVet -> {
                 viewModelScope.launch {
                     useCase.getVet(event.id).collect() { result ->
                         when (result) {
@@ -60,24 +60,31 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
                     }
                 }
             }
-            is PAVetDetailEvent.RegisterDate ->{
+            is PAVetDetailEvent.RegisterDate -> {
                 viewModelScope.launch {
-                    useCase.registerDate(day = event.day, patient = event.patient, reason = event.reason, idVet = event.idVet).collect() { result ->
-                        when(result){
+                    useCase.registerDate(
+                        day = event.day,
+                        patient = event.patient,
+                        reason = event.reason,
+                        idVet = event.idVet,
+                        vetName = event.vetName
+                    ).collect() { result ->
+                        when (result) {
                             is Resource.Loading -> {
-                                state = state.copy(loadingRegister = true )
+                                state = state.copy(loadingRegister = true)
                             }
                             is Resource.Success -> {
 
-                                state = state.copy(successRegister = result.data,loadingRegister = false )
+                                state = state.copy(
+                                    successRegister = result.data,
+                                    loadingRegister = false
+                                )
                             }
                             is Resource.Failure -> {}
-                            else -> {}
                         }
                     }
                 }
             }
         }
     }
-
 }

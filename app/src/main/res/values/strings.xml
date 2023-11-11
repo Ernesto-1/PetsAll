@@ -7,7 +7,7 @@
     <string name="profile_logout">Cerrar sesión</string>
 
     <!--Home-->
-    <string name="home_message_proposal">Hola!, la veterinaria PetsAll propone la siguiente fecha para la cita de %1$s el %2$s</string>
+    <string name="home_message_proposal">Hola!, la veterinaria %1$s propone la siguiente fecha para la cita de %2$s el %3$s</string>
     <string name="home_no_appointment">No tienes citas pendiente</string>
     <string name="home_pending_appointment">Tienes una cita pendiente de ser confirmada por la clinica</string>
     <string name="home_appointment">%1$s tiene una cita el %2$s</string>

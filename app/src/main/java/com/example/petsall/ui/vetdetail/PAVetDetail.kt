@@ -3,7 +3,6 @@ package com.example.petsall.ui.vetdetail
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
@@ -42,8 +41,8 @@ import com.example.petsall.R
 import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.presentation.vetdetail.PAVetDetailEvent
 import com.example.petsall.presentation.vetdetail.PAVetDetailViewModel
-import com.example.petsall.ui.components.CarouselOfImages
 import com.example.petsall.ui.components.CardDateOfPet
+import com.example.petsall.ui.components.CarouselOfImages
 import com.example.petsall.ui.components.MyMap
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
 import com.example.petsall.ui.components.listSpecialized
@@ -95,7 +94,6 @@ fun PAVetDetail(
     BackHandler {
         navController.navigateUp()
     }
-    Log.d("bhjkjnlkm", vetDetail.toString())
 
     LaunchedEffect(Unit) {
         if (vetDetail.id.isNotEmpty()) {
@@ -108,7 +106,7 @@ fun PAVetDetail(
                 location = loc
             }
         }
-        if (checkPhonePermission(context)){
+        if (checkPhonePermission(context)) {
 
         }
     }
@@ -365,7 +363,8 @@ fun PAVetDetail(
                                                             day = timestamp,
                                                             patient = selectedImage,
                                                             reason = selectedProblem,
-                                                            idVet = vetDetail.id
+                                                            idVet = vetDetail.id,
+                                                            vetName = vetDetail.name ?: ""
                                                         )
                                                     )
                                                     if (state.loadingRegister == false) {
@@ -415,13 +414,13 @@ fun PAVetDetail(
                         }
                     }
 
-                    if (vetDetail.listImages?.isNotEmpty() == true){
-                    Text(
-                        text = "Consultorio",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Purple200
-                    )
+                    if (vetDetail.listImages?.isNotEmpty() == true) {
+                        Text(
+                            text = "Consultorio",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Purple200
+                        )
                         CarouselOfImages(
                             itemsCount = vetDetail.listImages.size ?: 0,
                             itemContent = { index ->
@@ -438,7 +437,10 @@ fun PAVetDetail(
                     }
 
                     listSpecialized(vetDetail.listSpecialties as List<*>?, title = "Especialidades")
-                    listSpecialized(vetDetail.listSpecializedSector as List<*>?, title = "Atienden a")
+                    listSpecialized(
+                        vetDetail.listSpecializedSector as List<*>?,
+                        title = "Atienden a"
+                    )
                     Text(
                         text = "Contacto",
                         fontSize = 16.sp,
@@ -470,7 +472,7 @@ fun PAVetDetail(
 }
 
 @Composable
-fun PhoneNumber(phoneNumber: String,enable: Boolean = false) {
+fun PhoneNumber(phoneNumber: String, enable: Boolean = false) {
     val context = LocalContext.current
     val textColor = if (enable) GreenLight else Color.Gray
 
@@ -478,7 +480,13 @@ fun PhoneNumber(phoneNumber: String,enable: Boolean = false) {
         withStyle(style = SpanStyle(color = Color.Black)) {
             append("Numero:")
         }
-        withStyle(style = SpanStyle(color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
+        withStyle(
+            style = SpanStyle(
+                color = textColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        ) {
             append(" $phoneNumber")
         }
     }

@@ -17,9 +17,7 @@ class PAVaccinationUseCase @Inject constructor(private val repo: PAVaccinationRe
             emit(Resource.Loading())
             try {
                 val documentSnapshot = repo.getVaccinationList(idUser = idUser, idPet = idPet)
-                Log.d("hvgbjknlmñ1", repo.getVaccinationList(idUser = idUser, idPet = idPet).toString())
                 val vaccineData = documentSnapshot.mapToListVaccineDataClass().vaccines
-                Log.d("hvgbjknlmñ", vaccineData.toString())
                 emit(Resource.Success(vaccineData))
             } catch (e: Exception) {
                 emit(Resource.Failure(e))

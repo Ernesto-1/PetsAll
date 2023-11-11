@@ -32,7 +32,8 @@ class PAVetDetailDataSource @Inject constructor(
         day: Timestamp?,
         patient: String,
         reason: String,
-        idVet: String
+        idVet: String,
+        vetName: String
     ): Boolean {
         try {
             val existingAppointments = firebaseFirestore.collection("Citas")
@@ -49,6 +50,7 @@ class PAVetDetailDataSource @Inject constructor(
                     "reason" to reason,
                     "status" to "pendiente",
                     "idVeterinaria" to idVet,
+                    "nombreConsultorio" to vetName,
                     "userId" to firebaseAuth.uid.toString()
                 )
                 firebaseFirestore.collection("Citas").add(newAppointment).await()

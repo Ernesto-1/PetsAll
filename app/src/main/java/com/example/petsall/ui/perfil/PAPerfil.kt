@@ -1,5 +1,6 @@
 package com.example.petsall.ui.perfil
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.petsall.R
 import com.firebase.ui.auth.AuthUI
 
@@ -32,6 +32,10 @@ fun PAProfile(
     logout: () -> Unit
 ) {
     val context = LocalContext.current
+
+    val sharedPreferences = context.getSharedPreferences("nombre_pref", Context.MODE_PRIVATE)
+    val nickName = sharedPreferences.getString("nickName", "")
+
     Column(
         modifier = Modifier.padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,7 +53,7 @@ fun PAProfile(
             contentScale = ContentScale.Fit
         )
         Text(
-            text = "Hola Frank!",
+            text = "Hola $nickName!",
             fontSize = 24.sp,
             modifier = Modifier
                 .fillMaxWidth(),

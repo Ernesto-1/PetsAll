@@ -49,7 +49,6 @@ fun PAFiles(
     val state = viewModel.state
     val coroutine = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    Log.d("hbinjmk", state.data.toString())
 
     LaunchedEffect(Unit) {
         viewModel.onEvent(PAFilesEvent.GetFiles(idPet = idPet))

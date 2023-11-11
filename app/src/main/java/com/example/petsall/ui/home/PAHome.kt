@@ -2,7 +2,6 @@ package com.example.petsall.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
@@ -94,6 +93,14 @@ fun PAHome(
                 sharedPreferences.edit().putString(
                     "idPet", state.selectPet.value
                 ).apply()
+            }
+        }
+    }
+
+    state.dataUser?.name?.let {
+        LaunchedEffect(key1 = state.dataUser?.name) {
+            if (state.dataUser?.name?.isNotEmpty() == true) {
+                sharedPreferences.edit().putString("nickName", state.dataUser!!.name).apply()
             }
         }
     }
@@ -207,7 +214,6 @@ fun PAHome(
                                 LazyColumn {
                                     items(items = state.dataPets ?: mutableListOf(),
                                         key = { it.id.toString() }) { item ->
-                                        Log.d("Mascotas", item.id.toString())
                                         var show by remember { mutableStateOf(true) }
                                         val dismissState =
                                             rememberDismissState(confirmStateChange = {

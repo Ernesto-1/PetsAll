@@ -1,6 +1,5 @@
 package com.example.petsall.presentation.home
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -53,7 +52,6 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                                     dataPets = result.data as MutableList<PetData>?,
                                     loadingPets = false
                                 )
-                                Log.d("ErrorPets2", result.data.toString())
                                 if (event.pet?.isNotEmpty() == true) {
                                     state =
                                         state.copy(
