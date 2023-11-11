@@ -1,5 +1,9 @@
 package com.example.petsall.data.remote.home
 
+import android.util.Log
+import com.example.petsall.Constants.STATUS_CONFIRMED
+import com.example.petsall.Constants.STATUS_PENDING
+import com.example.petsall.Constants.STATUS_PROPOSAL
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -63,9 +67,10 @@ class PAHomeDatasource @Inject constructor(
             false
         }
     }
-   suspend fun getDatePet(): List<DocumentSnapshot?> {
+
+    suspend fun getDatePet(): List<DocumentSnapshot?> {
         val datePetQuery = firebaseFirestore.collection("Citas")
-            .whereIn("status", listOf("pendiente", "confirmado"))
+            .whereIn("status", listOf(STATUS_PENDING, STATUS_CONFIRMED, STATUS_PROPOSAL))
             .whereEqualTo("userId", firebaseAuth.uid.toString())
 
         return try {
@@ -73,6 +78,30 @@ class PAHomeDatasource @Inject constructor(
             datePet.documents
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun updateStatusDate(
+        idPet: String
+    ): Boolean {
+        Log.i("TAG_vet", "updateStatusDate: success $idPet")
+        var upd = false
+        try {
+            firebaseFirestore.collection("Citas")
+                .document(idPet)
+                .update("status", STATUS_CONFIRMED)
+                .addOnSuccessListener {
+                    upd = true
+                    Log.i("TAG_vet", "updateStatusDate: success")
+                }.addOnFailureListener {
+                    upd = false
+                    Log.i("TAG_vet", "updateStatusDate: failure ${it.message}")
+
+                }.await()
+            return upd
+        } catch (e: Exception) {
+            Log.e("registerDate", "Error adding appointment", e)
+            return false
         }
     }
 }

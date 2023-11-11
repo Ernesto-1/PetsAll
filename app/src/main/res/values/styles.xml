@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MyDialogStyle" parent="@android:style/Theme.Material.Dialog">
+        <item name="android:windowBackground">@color/fui_transparent</item>
+        <item name="android:background">@color/fui_transparent</item>
+    </style>
+
+</resources>

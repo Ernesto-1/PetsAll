@@ -1,7 +1,6 @@
 package com.example.petsall.presentation.home
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -41,7 +40,7 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                 }
 
             }
-            is PAHomeEvent.GetDataPets ->{
+            is PAHomeEvent.GetDataPets -> {
                 viewModelScope.launch {
                     useCase.getPets().collect() { result ->
                         when (result) {
@@ -49,25 +48,41 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                                 state = state.copy(loadingPets = true)
                             }
                             is Resource.Success -> {
-                                state = state.copy(numPets = (result.data?.size ?: 4) < 4, dataPets = result.data as MutableList<PetData>?,loadingPets = false)
+                                state = state.copy(
+                                    numPets = (result.data?.size ?: 4) < 4,
+                                    dataPets = result.data as MutableList<PetData>?,
+                                    loadingPets = false
+                                )
                                 Log.d("ErrorPets2", result.data.toString())
-                                if (event.pet?.isNotEmpty() == true){
-                                    state = state.copy(dataPet = result.data?.first() { it.id == event.pet },selectPet = mutableStateOf(result.data?.first() { it.id == event.pet }?.id.toString()))
-                                    getAllDate(idPet = event.pet )
-                                }else{
-                                    state = state.copy(dataPet = result.data?.first(), selectPet = mutableStateOf(result.data?.first()?.id.toString()))
-                                    getAllDate(idPet = "" )
+                                if (event.pet?.isNotEmpty() == true) {
+                                    state =
+                                        state.copy(
+                                            dataPet = result.data?.first() { it.id == event.pet },
+                                            selectPet = mutableStateOf(result.data?.first() { it.id == event.pet }?.id.toString())
+                                        )
+                                    getAllDate(idPet = event.pet)
+                                } else {
+                                    state = state.copy(
+                                        dataPet = result.data?.first(),
+                                        selectPet = mutableStateOf(result.data?.first()?.id.toString())
+                                    )
+                                    getAllDate(idPet = "")
                                 }
                             }
-                            else ->{
-                                state = state.copy(dataPet = null, numPets = true, dataPets = mutableListOf(),loadingPets = false)
+                            else -> {
+                                state = state.copy(
+                                    dataPet = null,
+                                    numPets = true,
+                                    dataPets = mutableListOf(),
+                                    loadingPets = false
+                                )
 
                             }
                         }
                     }
                 }
             }
-            is PAHomeEvent.DeleteDatePet ->{
+            is PAHomeEvent.DeleteDatePet -> {
                 viewModelScope.launch {
                     useCase.deleteDatePet(event.idPet).collect() { result ->
                         when (result) {
@@ -81,24 +96,41 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                     }
                 }
             }
+            is PAHomeEvent.UpdateStatusDate -> {
+                viewModelScope.launch {
+                    useCase.updateStatusDate(event.idPet).collect() { result ->
+                        when (result) {
+                            is Resource.Loading -> {}
+                            is Resource.Success -> {
+                                Log.d("TAG_vet", "status::" + result.data.toString())
+                                state = state.copy(
+                                    onChangeDate = result.data ?: false,
+                                    datePet = state.datePet?.copy(id = "")
+                                )
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+            }
             else -> {}
         }
     }
 
-    private fun getAllDate(idPet: String){
+    private fun getAllDate(idPet: String) {
         viewModelScope.launch {
             useCase.getDatePet().collect() { result ->
                 when (result) {
                     is Resource.Loading -> {}
                     is Resource.Success -> {
 
-                        state = state.copy(datePets = result.data as MutableList<PetDateMedic>? )
+                        state = state.copy(datePets = result.data as MutableList<PetDateMedic>?)
 
-                        state = if (idPet.isNotEmpty()){
-                            state.copy(datePet = result.data?.firstOrNull { it.patient == idPet } )
+                        state = if (idPet.isNotEmpty()) {
+                            state.copy(datePet = result.data?.firstOrNull { it.patient == idPet })
 
-                        }else{
-                            state.copy(datePet = result.data?.firstOrNull { it.patient == state.selectPet.value} )
+                        } else {
+                            state.copy(datePet = result.data?.firstOrNull { it.patient == state.selectPet.value })
 
                         }
 

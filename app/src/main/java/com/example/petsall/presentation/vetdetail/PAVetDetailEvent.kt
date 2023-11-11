@@ -9,7 +9,4 @@ sealed class PAVetDetailEvent{
     data class GetDataPets(val pet: String) : PAVetDetailEvent()
     data class RegisterDate(val day: Timestamp?,val patient: String, val reason: String, val idVet: String) : PAVetDetailEvent()
 
-
-
-
 }

@@ -1,14 +1,12 @@
 package com.example.petsall
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -38,18 +35,16 @@ import com.example.petsall.ui.emergency.PAEmergency
 import com.example.petsall.ui.explore.PAExplore
 import com.example.petsall.ui.files.PAFiles
 import com.example.petsall.ui.home.PAHome
-import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.login.PALogin
 import com.example.petsall.ui.navigation.Menu
 import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.newPet.PANewPet
-import com.example.petsall.ui.perfil.PAPerfil
+import com.example.petsall.ui.perfil.PAProfile
 import com.example.petsall.ui.signup.PASignUp
+import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.vaccination.PAVaccination
 import com.example.petsall.ui.vet.PAVet
 import com.example.petsall.ui.vetdetail.PAVetDetail
-import com.example.petsall.utils.BottomMenuViewModel
-import com.example.petsall.utils.getList
 import com.example.petsall.utils.getObjectFromJson
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -207,7 +202,16 @@ class MainActivity() : ComponentActivity() {
                                 )
                             }
                             composable(Route.PANewPet) { PANewPet(navController = navigationController) }
-                            composable(Route.PAPerfil) { PAPerfil(navController = navigationController) }
+
+                            composable(Route.PAPerfil) {
+                                PAProfile {
+                                    val intent =
+                                        Intent(applicationContext, MainActivity::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            }
+
                             composable(
                                 "${Route.PAChangePet}/{petSelect}",
                                 arguments = listOf(navArgument("petSelect") {
@@ -233,14 +237,9 @@ class MainActivity() : ComponentActivity() {
                                         navController = navigationController,
                                     )
                                 }
-
                             }
-
-
                         }
                     }
-
-
                 }
             }
         }

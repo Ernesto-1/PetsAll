@@ -14,5 +14,4 @@ interface PAVetDetailRepo {
 
     suspend fun getDataPets(): List<DocumentSnapshot?>
 
-
 }

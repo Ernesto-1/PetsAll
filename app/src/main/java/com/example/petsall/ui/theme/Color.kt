@@ -19,3 +19,7 @@ val plata = Color(0xFFE3e4e5)
 val statusEarring = Color(0xFFD4D4D4) // Completamente opaco
 val statusDefeated = Color(0xFFFFDADA) // Completamente opaco
 val statusCurrent = Color(0xFFCFECC8)
+
+val PAError = Color(0xFFFF5A5A)
+val PASucces = Color(0xFFA8BB5A)
+val PAGray = Color(0xFF8E8D8C)

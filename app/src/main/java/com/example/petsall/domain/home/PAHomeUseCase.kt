@@ -9,50 +9,54 @@ import javax.inject.Inject
 
 class PAHomeUseCase @Inject constructor(private val repository: PAHomeRepo) {
 
-    suspend operator fun invoke(): Flow<Resource<UserDataClass?>> =
-        flow {
-            emit(Resource.Loading())
-            try {
-                val documentSnapshot = repository.getDataUser()
-                val userData = documentSnapshot?.mapTouserDataClass()
-                emit(Resource.Success(userData))
-            } catch (e: Exception) {
-                emit(Resource.Failure(e))
-            }
+    suspend operator fun invoke(): Flow<Resource<UserDataClass?>> = flow {
+        emit(Resource.Loading())
+        try {
+            val documentSnapshot = repository.getDataUser()
+            val userData = documentSnapshot?.mapTouserDataClass()
+            emit(Resource.Success(userData))
+        } catch (e: Exception) {
+            emit(Resource.Failure(e))
         }
+    }
 
-    suspend fun getPets(): Flow<Resource<List<PetData>?>> =
-        flow{
+    suspend fun getPets(): Flow<Resource<List<PetData>?>> = flow {
             emit(Resource.Loading())
             try {
                 val documentSnapshots = repository.getDataPets()
                 val petsData = documentSnapshots.mapToPetsDataClass().mascotas
                 emit(Resource.Success(petsData))
             } catch (e: Exception) {
-                 //emit(Resource.Failure(e))
+                //emit(Resource.Failure(e))
             }
         }
 
-    suspend fun getDatePet(): Flow<Resource<List<PetDateMedic>?>> =
-        flow {
-            emit(Resource.Loading())
-            try {
-                val documentSnapshots = repository.getDatePet()
-                val petsDateMedic = documentSnapshots.mapToDateMedicDataClass().datesMedic
-                Log.d("vgjbhknlmcase", petsDateMedic.toString())
-                emit(Resource.Success(petsDateMedic))
-            } catch (e: Exception) {
-               // emit(Resource.Failure(e))
-            }
+    suspend fun getDatePet(): Flow<Resource<List<PetDateMedic>?>> = flow {
+        emit(Resource.Loading())
+        try {
+            val documentSnapshots = repository.getDatePet()
+            val petsDateMedic = documentSnapshots.mapToDateMedicDataClass().datesMedic
+            emit(Resource.Success(petsDateMedic))
+        } catch (e: Exception) {
+            // emit(Resource.Failure(e))
         }
+    }
 
-    suspend fun deleteDatePet(idPet: String): Flow<Resource<Boolean?>> =
-        flow {
-            emit(Resource.Loading())
-            try {
-                emit(Resource.Success(repository.deleteDataPet(idPet = idPet)))
-            } catch (e: Exception) {
-                emit(Resource.Failure(e))
-            }
+    suspend fun deleteDatePet(idPet: String): Flow<Resource<Boolean?>> = flow {
+        emit(Resource.Loading())
+        try {
+            emit(Resource.Success(repository.deleteDataPet(idPet = idPet)))
+        } catch (e: Exception) {
+            emit(Resource.Failure(e))
         }
+    }
+
+    suspend fun updateStatusDate(idPet: String): Flow<Resource<Boolean?>> = flow {
+        emit(Resource.Loading())
+        try {
+            emit(Resource.Success(repository.updateStatusDate(idPet = idPet)))
+        } catch (e: Exception) {
+            emit(Resource.Failure(e))
+        }
+    }
 }

@@ -1,7 +1,10 @@
 package com.example.petsall.domain.vetdetail
 
 import android.util.Log
-import com.example.petsall.data.remote.model.*
+import com.example.petsall.data.remote.model.PetData
+import com.example.petsall.data.remote.model.VetData
+import com.example.petsall.data.remote.model.mapToPetsDataClass
+import com.example.petsall.data.remote.model.mapToVetData
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.utils.Resource
 import com.google.firebase.Timestamp
@@ -48,7 +51,7 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
                     )
                 )
             } catch (e: Exception) {
-                Log.d("bhnjkm", "registerDate: ")
+                Log.d("DetailDate", "registerDate: ${e.message}")
                 emit(Resource.Failure(e))
             }
         }

@@ -1,5 +1,6 @@
 package com.example.petsall.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,11 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.petsall.R
+import com.example.petsall.ui.theme.stTexts
 
 @Preview
 @Composable
@@ -37,7 +41,7 @@ fun PACard(
         shape = RoundedCornerShape(12.dp),
         backgroundColor = Color.White
     ) {
-        Row() {
+        Row {
             Icon(
                 painter = painterResource(id = iconCard),
                 contentDescription = "",
@@ -48,7 +52,11 @@ fun PACard(
                 tint = colorIcon
             )
             Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-                Text(text = txtCard, modifier = Modifier.fillMaxWidth(), fontSize = 15.sp)
+                Text(
+                    text = txtCard,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = stTexts.copy(textAlign = TextAlign.Left)
+                )
             }
         }
     }
@@ -59,13 +67,12 @@ fun PACard(
 fun PACard2(
     modifier: Modifier = Modifier,
     iconCard: Int = R.drawable.request,
-    txtCard: String = "gvbhnjmk,ln",
+    txtCard: String = "PetsAll",
     colorIcon: Color = Color(0xff78CEFF),
     onClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
             .height(100.dp)
             .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(12.dp))
             .clickable(
@@ -77,16 +84,17 @@ fun PACard2(
         backgroundColor = Color.White
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
+            Image(
                 painter = painterResource(id = iconCard),
                 contentDescription = "",
                 modifier = Modifier
                     .padding(vertical = 10.dp)
                     .height(45.dp)
                     .fillMaxWidth(),
-                tint = colorIcon
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(colorIcon)
             )
-            Text(text = txtCard, fontSize = 12.sp)
+            Text(text = txtCard, style = stTexts)
         }
     }
 }

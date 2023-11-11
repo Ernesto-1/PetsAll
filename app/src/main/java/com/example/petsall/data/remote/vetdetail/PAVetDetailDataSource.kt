@@ -1,6 +1,9 @@
 package com.example.petsall.data.remote.vetdetail
 
 import android.util.Log
+import com.example.petsall.Constants.STATUS_CONFIRMED
+import com.example.petsall.Constants.STATUS_PENDING
+import com.example.petsall.Constants.STATUS_PROPOSAL
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.domain.WebService
 import com.google.firebase.Timestamp
@@ -33,7 +36,7 @@ class PAVetDetailDataSource @Inject constructor(
     ): Boolean {
         try {
             val existingAppointments = firebaseFirestore.collection("Citas")
-                .whereIn("status", listOf("pendiente", "confirmado"))
+                .whereIn("status", listOf(STATUS_PENDING, STATUS_CONFIRMED, STATUS_PROPOSAL))
                 .whereEqualTo("patient", patient)
                 .get()
                 .await()

@@ -19,5 +19,6 @@ data class PAHomeState(
     var datePet: PetDateMedic? = null,
     var datePets: List<PetDateMedic>? = listOf(),
     var isPetDelete: Boolean? = false,
-    var selectPet: MutableState<String> = mutableStateOf("")
+    var selectPet: MutableState<String> = mutableStateOf(""),
+    var onChangeDate: Boolean = false
     )

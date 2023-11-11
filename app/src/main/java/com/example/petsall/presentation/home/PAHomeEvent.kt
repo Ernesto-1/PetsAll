@@ -5,6 +5,6 @@ sealed class PAHomeEvent{
     data class GetDataPets(val pet: String? = "") : PAHomeEvent()
     data class GetDatePet(val idPet: String = "",val userId: String = "") : PAHomeEvent()
     data class DeleteDatePet(val idPet: String = "") : PAHomeEvent()
-
+    data class UpdateStatusDate(val idPet: String = "") : PAHomeEvent()
 
 }

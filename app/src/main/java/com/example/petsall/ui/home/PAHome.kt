@@ -28,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,19 +42,18 @@ import com.example.petsall.ui.components.DismissBackground
 import com.example.petsall.ui.components.PACard
 import com.example.petsall.ui.components.PACard2
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
+import com.example.petsall.ui.components.cards.PAStatusDate
+import com.example.petsall.ui.components.cards.StatusDate
 import com.example.petsall.ui.components.skeleton.TopBarSkeleton
 import com.example.petsall.ui.login.ButtonDefault
 import com.example.petsall.ui.navigation.Route
-import com.example.petsall.utils.AppConstans
-import com.example.petsall.utils.checkLocationPermission
-import com.example.petsall.utils.convertTimestampToString2
-import com.example.petsall.utils.permissions
-import com.google.firebase.Timestamp
+import com.example.petsall.ui.theme.stSubtitle
+import com.example.petsall.ui.theme.stTitle
+import com.example.petsall.utils.*
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -93,11 +91,9 @@ fun PAHome(
         if (state.dataPets?.isNotEmpty() == true) {
             if (state.selectPet.value.isEmpty()) {
                 viewModel.onEvent(PAHomeEvent.GetDataPets(""))
-                sharedPreferences.edit()
-                    .putString(
-                        "idPet",
-                        state.selectPet.value
-                    ).apply()
+                sharedPreferences.edit().putString(
+                    "idPet", state.selectPet.value
+                ).apply()
             }
         }
     }
@@ -116,6 +112,13 @@ fun PAHome(
         }
     }
 
+    LaunchedEffect(key1 = state.onChangeDate, key2 = state.datePet?.id) {
+        Log.i("TAG_vet", "PAHome: entra al onchange ${state.onChangeDate}")
+        if(state.onChangeDate){
+            Log.i("TAG_vet", "PAHome: get again date ")
+            viewModel.onEvent(PAHomeEvent.GetDataPets(state.datePet?.patient))
+        }
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         TopAppBar(
@@ -139,18 +142,19 @@ fun PAHome(
                                         .height(50.dp)
                                         .width(50.dp)
                                         .clip(CircleShape),
-                                    contentScale = ContentScale.Crop, placeholder = painterResource(
+                                    contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(
                                         id = R.drawable.circle_24_image
                                     )
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
+
                                 Text(
                                     text = state.dataPet?.name.toString(),
                                     modifier = Modifier.align(
                                         Alignment.CenterVertically
                                     ),
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Light
+                                    style = stSubtitle
                                 )
                                 Icon(imageVector = Icons.Filled.ArrowDropDown,
                                     contentDescription = "",
@@ -171,7 +175,6 @@ fun PAHome(
                         }
                     }
                 }
-
             },
             backgroundColor = Color.White,
             elevation = 0.dp,
@@ -307,56 +310,37 @@ fun PAHome(
             }) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 16.dp)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Hola ${state.dataUser?.name}!",
-                    fontSize = 24.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 35.dp),
-                    textAlign = TextAlign.Center
+                    style = stTitle
                 )
                 Spacer(modifier = Modifier.height(50.dp))
 
-                if (state.dataPets?.isNotEmpty() == true) {
-                    Text(
-                        text = if (state.datePets?.isEmpty() == true || state.datePet == null) "No tienes citas pendientes" else {
-                            when (state.datePet?.status.toString()) {
-                                "pendiente" -> "Tienes una cita pendiente de ser confirmada por la clinica"
-                                "confirmado" -> {
-                                    val datePet =
-                                        convertTimestampToString2(state.datePet?.dateMedic as Timestamp)
-                                    "${
-                                        state.dataPet?.name
-                                    } tiene una cita el $datePet"
-                                }
-                                else -> ""
-                            }
-                        },
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 77.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color(0xff84B1B8)
-                    )
-                } else {
-                    Text(
-                        text = "No tienes mascotas registradas",
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 77.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color(0xff84B1B8)
-                    )
+                PAStatusDate(
+                    hasPets = state.dataPets?.isNotEmpty(),
+                    data = state.datePet,
+                    patient = state.dataPet
+                ) {
+                    when (it) {
+                        StatusDate.Accept -> {
+                            viewModel.onEvent(PAHomeEvent.UpdateStatusDate(state.datePet?.id ?: ""))
+                        }
+                        StatusDate.Cancel -> {
+
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(50.dp))
-                Row {
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     PACard2(
                         iconCard = R.drawable.healt,
                         txtCard = "Cartilla de vacunacion",
@@ -365,14 +349,13 @@ fun PAHome(
                     ) {
                         navController.navigate("${Route.PAVaccinationCard}/${user?.uid.toString()}/${state.dataPet?.id}")
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
 
                     PACard2(
                         iconCard = R.drawable.proceedings,
                         txtCard = "Expediente",
                         colorIcon = Color(0xff78CEFF),
                         modifier = Modifier.weight(1f)
-                    ){
+                    ) {
                         navController.navigate("${Route.PAFiles}/${state.dataPet?.id}")
                     }
                 }

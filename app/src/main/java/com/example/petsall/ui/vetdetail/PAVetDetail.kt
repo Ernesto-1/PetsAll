@@ -115,7 +115,7 @@ fun PAVetDetail(
 
     LaunchedEffect(key1 = state.successRegister) {
         val message =
-            if (state.successRegister == true) "Se envio tu peticion de cita exitosamente" else "Tu mascota ya cuenta con una cita pendiente"
+            if (state.successRegister == true) "Se envio tu petición de cita exitosamente" else "Tu mascota ya cuenta con una cita pendiente"
 
         if (state.successRegister == true || state.successRegister == false) {
             Toast.makeText(
