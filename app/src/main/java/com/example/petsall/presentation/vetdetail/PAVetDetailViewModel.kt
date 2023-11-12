@@ -62,14 +62,8 @@ class PAVetDetailViewModel @Inject constructor(private val useCase: PAVetDetailU
             }
             is PAVetDetailEvent.RegisterDate -> {
                 viewModelScope.launch {
-                    useCase.registerDate(
-                        day = event.day,
-                        patient = event.patient,
-                        reason = event.reason,
-                        idVet = event.idVet,
-                        vetName = event.vetName
-                    ).collect() { result ->
-                        when (result) {
+                    useCase.registerDate(event.data).collect() { result ->
+                        when(result){
                             is Resource.Loading -> {
                                 state = state.copy(loadingRegister = true)
                             }

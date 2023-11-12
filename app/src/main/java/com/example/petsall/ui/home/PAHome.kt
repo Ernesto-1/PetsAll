@@ -121,7 +121,7 @@ fun PAHome(
 
     LaunchedEffect(key1 = state.onChangeDate, key2 = state.datePet?.id) {
         if (state.onChangeDate) {
-            viewModel.onEvent(PAHomeEvent.GetDataPets(state.datePet?.patient))
+            viewModel.onEvent(PAHomeEvent.GetDataPets(state.datePet?.idPatient))
         }
     }
 
@@ -245,7 +245,7 @@ fun PAHome(
                                                                             item.id.toString()
                                                                         ).apply()
                                                                     state.datePet =
-                                                                        state.datePets?.firstOrNull { it.patient == item.id.toString() }
+                                                                        state.datePets?.firstOrNull { it.idPatient == item.id.toString() }
                                                                     state.dataPet =
                                                                         state.dataPets?.first { it.id == item.id.toString() }
                                                                     sheetState.hide()

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.petsall.R
 import com.example.petsall.data.remote.model.VetData
+import com.example.petsall.presentation.model.RegisterDataRequest
 import com.example.petsall.presentation.vetdetail.PAVetDetailEvent
 import com.example.petsall.presentation.vetdetail.PAVetDetailViewModel
 import com.example.petsall.ui.components.CardDateOfPet
@@ -67,13 +70,12 @@ fun PAVetDetail(
     viewModel: PAVetDetailViewModel = hiltViewModel()
 ) {
     val date = rememberSaveable { mutableStateOf("") }
-    val problemDate = listOf("Consulta general", "Vacunacion")
     val expandedState = rememberSaveable { mutableStateOf(false) }
-    val expandedStateConsult = rememberSaveable { mutableStateOf(false) }
     var selectedTime by rememberSaveable { mutableStateOf("") }
-    var selectedProblem by rememberSaveable { mutableStateOf("") }
     var selectedImage by rememberSaveable { mutableStateOf("") }
     val state = viewModel.state
+    var AgePet: String = ""
+    var selectedProblem by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -185,14 +187,19 @@ fun PAVetDetail(
                                 )
                                 LazyRow(
                                     contentPadding = PaddingValues(
-                                        horizontal = 40.dp, vertical = 6.dp
+                                        horizontal = 40.dp, vertical = 10.dp
                                     ), horizontalArrangement = Arrangement.spacedBy(15.dp)
                                 ) {
                                     items(state.dataPets) { item ->
                                         CardDateOfPet(data = item,
                                             item.id ?: "",
                                             isSelected = selectedImage == item.id.toString(),
-                                            onClick = { selectedImage = item.id.toString() })
+                                            onClick = {
+                                                selectedImage = item.id.toString()
+                                                state.selectedPet.value = item
+                                                AgePet =
+                                                    calculateAge(state.selectedPet.value.birthdate!!)
+                                            })
                                     }
 
                                 }
@@ -206,7 +213,7 @@ fun PAVetDetail(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
                                         .width(282.dp)
-                                        .padding(vertical = 4.dp),
+                                        .padding(vertical = 5.dp),
                                     colors = TextFieldDefaults.outlinedTextFieldColors(
                                         focusedBorderColor = plata,
                                         unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
@@ -229,49 +236,6 @@ fun PAVetDetail(
                                     enabled = false
                                 )
 
-                                OutlinedTextField(
-                                    value = selectedProblem,
-                                    onValueChange = { selectedProblem = it },
-                                    label = { Text("Selecciona el motivo") },
-                                    singleLine = true,
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .width(282.dp)
-                                        .padding(vertical = 5.dp),
-                                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = plata,
-                                        unfocusedBorderColor = MaterialTheme.colors.onSurface.copy(
-                                            alpha = 0.15f
-                                        ),
-                                        textColor = color,
-                                        focusedLabelColor = color
-                                    ),
-                                    textStyle = MaterialTheme.typography.body1,
-                                    trailingIcon = {
-                                        IconButton(onClick = {
-                                            expandedStateConsult.value = true
-                                        }) {
-                                            Icon(
-                                                Icons.Filled.ArrowDropDown,
-                                                contentDescription = "Expandir opciones"
-                                            )
-                                        }
-                                    },
-                                    readOnly = true,
-                                    enabled = false
-                                )
-                                DropdownMenu(expanded = expandedStateConsult.value,
-                                    onDismissRequest = { expandedStateConsult.value = false }) {
-                                    problemDate.forEach { problem ->
-                                        DropdownMenuItem(onClick = {
-                                            selectedProblem = problem
-                                            expandedStateConsult.value = false
-                                        }) {
-                                            Text(text = problem)
-                                        }
-                                    }
-                                }
                                 if (date.value.isNotEmpty()) {
                                     val availableTimes = generateAvailableTimes(
                                         dateString = date.value,
@@ -338,6 +302,33 @@ fun PAVetDetail(
                                         }
                                     }
                                 }
+
+                                OutlinedTextField(
+                                    value = selectedProblem,
+                                    onValueChange = { code ->
+                                        selectedProblem = code
+                                    },
+                                    label = {
+                                        androidx.compose.material3.Text(
+                                            "Menciona el motivo de la consulta"
+                                        )
+                                    },
+                                    keyboardActions = KeyboardActions(
+                                        onDone = {
+                                            focusManager.clearFocus()
+                                        }
+                                    ),
+                                    modifier = Modifier
+                                        .width(282.dp)
+                                        .height(200.dp)
+                                        .padding(vertical = 5.dp)
+                                        .background(Color.White),
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        textColor = Color.Black,
+
+                                    )
+                                )
+
                                 Card(
                                     elevation = 1.dp,
                                     modifier = Modifier
@@ -358,13 +349,21 @@ fun PAVetDetail(
                                                         dateString = date.value,
                                                         timeString = selectedTime.split(" ")[0]
                                                     )
+                                                    val data = RegisterDataRequest(
+                                                        requestedAppointment = timestamp,
+                                                        idConsult = vetDetail.id,
+                                                        idPatient = state.selectedPet.value.id,
+                                                        patient = state.selectedPet.value.name,
+                                                        reason = selectedProblem,
+                                                        lat = vetDetail.lat,
+                                                        nameConsult = vetDetail.name,
+                                                        pet = state.selectedPet.value.pet,
+                                                        long = vetDetail.long,
+                                                        age = AgePet
+                                                    )
                                                     viewModel.onEvent(
                                                         PAVetDetailEvent.RegisterDate(
-                                                            day = timestamp,
-                                                            patient = selectedImage,
-                                                            reason = selectedProblem,
-                                                            idVet = vetDetail.id,
-                                                            vetName = vetDetail.name ?: ""
+                                                            data = data
                                                         )
                                                     )
                                                     if (state.loadingRegister == false) {

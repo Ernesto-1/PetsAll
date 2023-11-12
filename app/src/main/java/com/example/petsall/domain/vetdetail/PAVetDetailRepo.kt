@@ -1,7 +1,7 @@
 package com.example.petsall.domain.vetdetail
 
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
-import com.google.firebase.Timestamp
+import com.example.petsall.presentation.model.RegisterDataRequest
 import com.google.firebase.firestore.DocumentSnapshot
 
 interface PAVetDetailRepo {
@@ -10,13 +10,7 @@ interface PAVetDetailRepo {
 
     suspend fun getVet(id: String): DocumentSnapshot
 
-    suspend fun registerDate(
-        day: Timestamp?,
-        patient: String,
-        reason: String,
-        idVet: String,
-        vetName: String
-    ): Boolean?
+    suspend fun registerDate(data: RegisterDataRequest): Boolean?
 
     suspend fun getDataPets(): List<DocumentSnapshot?>
 

@@ -180,3 +180,37 @@ fun makeACall(context: Context, phoneNumber: String) {
     intent.data = Uri.parse("tel: $phoneNumber")
     ContextCompat.startActivity(context, intent, bundleOf())
 }
+
+fun calculateAge(timestamp: Timestamp): String {
+    val currentDate = Date()
+
+    val birthDateMillis = timestamp.seconds * 1000L
+    val birthDate = Date(birthDateMillis)
+
+    val currentCalendar = Calendar.getInstance()
+    currentCalendar.time = currentDate
+
+    val birthCalendar = Calendar.getInstance()
+    birthCalendar.time = birthDate
+
+    var years = currentCalendar.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
+    var months = currentCalendar.get(Calendar.MONTH) - birthCalendar.get(Calendar.MONTH)
+
+    if (months < 0) {
+        years--
+        months += 12
+    }
+
+    val formattedAge = when {
+        years > 1 && months > 1 -> "$years años $months meses"
+        years == 1 && months == 1 -> "$years año $months mes"
+        years > 1 -> "$years años"
+        years == 1 -> "$years año"
+        months == 1 -> "$months mes"
+        months > 1 -> "$months meses"
+        else -> "Menos de un mes"
+    }
+
+    return formattedAge
+}
+

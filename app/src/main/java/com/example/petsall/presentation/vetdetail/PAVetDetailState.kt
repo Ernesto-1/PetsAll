@@ -1,5 +1,7 @@
 package com.example.petsall.presentation.vetdetail
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.example.petsall.data.remote.model.PetData
 import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.data.remote.vetdetail.model.GeocodingResult
@@ -10,6 +12,7 @@ data class PAVetDetailState(
     var message: String = "",
     var successRegister: Boolean? = null,
     var data: List<GeocodingResult?> = listOf(),
+    val selectedPet: MutableState<PetData> = mutableStateOf(PetData()),
     var dataVet: VetData? = VetData(),
     var dataPets: List<PetData> = listOf()
 

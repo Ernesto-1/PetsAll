@@ -6,8 +6,8 @@ import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.data.remote.model.mapToPetsDataClass
 import com.example.petsall.data.remote.model.mapToVetData
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
+import com.example.petsall.presentation.model.RegisterDataRequest
 import com.example.petsall.utils.Resource
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -36,18 +36,14 @@ class PAVetDetailUseCase @Inject constructor(private val repository: PAVetDetail
             }
         }
 
-    suspend fun registerDate(day: Timestamp?,patient: String, reason: String, idVet:String, vetName: String): Flow<Resource<Boolean?>> =
+    suspend fun registerDate(data: RegisterDataRequest): Flow<Resource<Boolean?>> =
         flow {
             emit(Resource.Loading())
             try {
                 emit(
                     Resource.Success(
                         repository.registerDate(
-                            day = day,
-                            patient = patient,
-                            reason = reason,
-                            idVet = idVet,
-                            vetName = vetName
+                            data = data
                         )
                     )
                 )

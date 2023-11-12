@@ -6,13 +6,12 @@ import com.example.petsall.Constants.STATUS_PENDING
 import com.example.petsall.Constants.STATUS_PROPOSAL
 import com.example.petsall.data.remote.vetdetail.model.Coordinates
 import com.example.petsall.domain.WebService
-import com.google.firebase.Timestamp
+import com.example.petsall.presentation.model.RegisterDataRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.math.log
 
 class PAVetDetailDataSource @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -29,30 +28,31 @@ class PAVetDetailDataSource @Inject constructor(
     }
 
     suspend fun registerDate(
-        day: Timestamp?,
-        patient: String,
-        reason: String,
-        idVet: String,
-        vetName: String
+        data: RegisterDataRequest
     ): Boolean {
         try {
             val existingAppointments = firebaseFirestore.collection("Citas")
                 .whereIn("status", listOf(STATUS_PENDING, STATUS_CONFIRMED, STATUS_PROPOSAL))
-                .whereEqualTo("patient", patient)
+                .whereEqualTo("idPatient", data.idPatient)
                 .get()
                 .await()
             Log.e("registerDate", existingAppointments.isEmpty.toString())
 
             return if (existingAppointments.documents.isEmpty()) {
                 val newAppointment = hashMapOf(
-                    "day" to day,
-                    "patient" to patient,
-                    "reason" to reason,
+                    "citaSolicitada" to data.requestedAppointment,
+                    "idPatient" to data.idPatient,
+                    "motivo" to data.reason,
+                    "patient" to data.patient,
                     "status" to "pendiente",
-                    "idVeterinaria" to idVet,
-                    "nombreConsultorio" to vetName,
-                    "userId" to firebaseAuth.uid.toString()
-                )
+                    "idConsultorio" to data.idConsult,
+                    "latitud" to data.lat,
+                    "longitud" to data.long,
+                    "mascota" to data.pet,
+                    "nombreConsultorio" to data.nameConsult,
+                    "userId" to firebaseAuth.uid.toString(),
+                    "edad" to data.age,
+                    "asunto" to "Consulta")
                 firebaseFirestore.collection("Citas").add(newAppointment).await()
                 true
             } else {

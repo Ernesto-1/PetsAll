@@ -49,7 +49,7 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                             is Resource.Success -> {
                                 state = state.copy(
                                     numPets = (result.data?.size ?: 4) < 4,
-                                    dataPets = result.data as MutableList<PetData>?,
+                                    dataPets = result.data,
                                     loadingPets = false
                                 )
                                 if (event.pet?.isNotEmpty() == true) {
@@ -149,10 +149,10 @@ class PAHomeViewModel @Inject constructor(private val useCase: PAHomeUseCase) : 
                         state = state.copy(datePets = result.data as MutableList<PetDateMedic>?)
 
                         state = if (idPet.isNotEmpty()) {
-                            state.copy(datePet = result.data?.firstOrNull { it.patient == idPet })
+                            state.copy(datePet = result.data?.firstOrNull { it.idPatient == idPet })
 
                         } else {
-                            state.copy(datePet = result.data?.firstOrNull { it.patient == state.selectPet.value })
+                            state.copy(datePet = result.data?.firstOrNull { it.idPatient == state.selectPet.value })
 
                         }
 
