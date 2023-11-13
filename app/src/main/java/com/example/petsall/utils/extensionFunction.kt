@@ -118,10 +118,16 @@ fun convertTimestampToString(timestamp: Timestamp): String {
     val dateFormat = SimpleDateFormat("d 'de' MMMM 'del' yyyy", Locale.getDefault())
     return dateFormat.format(date)
 }
+
 fun convertTimestampToString2(timestamp: Timestamp): String {
     val date = timestamp.toDate()
-    val dateFormat = SimpleDateFormat("d 'de' MMMM 'del' yyyy 'a las' HH:mm", Locale.getDefault())
-    return dateFormat.format(date)
+    val cal = Calendar.getInstance()
+    cal.time = date
+    val hourOfDay = cal.get(Calendar.HOUR_OF_DAY)
+    val amPm = if (hourOfDay < 12) "AM" else "PM"
+
+    val dateFormat = SimpleDateFormat("d 'de' MMMM 'del' yyyy 'a las' hh:mm a", Locale.getDefault())
+    return dateFormat.format(date).replace("AM/PM", amPm)
 }
 
 

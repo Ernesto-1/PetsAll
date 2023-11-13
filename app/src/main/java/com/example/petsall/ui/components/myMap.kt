@@ -21,7 +21,12 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 
 @Composable
-fun MyMap(modifier: Modifier = Modifier, positionLtLn: LatLng, location: Location, nameBussines:String = "") {
+fun MyMap(
+    modifier: Modifier = Modifier,
+    positionLtLn: LatLng,
+    location: Location,
+    nameBussines: String = ""
+) {
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(positionLtLn, 15f)
@@ -61,7 +66,9 @@ fun MyMap(modifier: Modifier = Modifier, positionLtLn: LatLng, location: Locatio
         elevation = 5.dp
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize().border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
+            modifier = Modifier
+                .fillMaxSize()
+                .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
             cameraPositionState = cameraPositionState,
             uiSettings = uiSettings,
             properties = MapProperties(
@@ -79,4 +86,64 @@ fun MyMap(modifier: Modifier = Modifier, positionLtLn: LatLng, location: Locatio
         }
     }
 
+}
+
+@Composable
+fun MyMapWithoutMyLocation(
+    modifier: Modifier = Modifier,
+    positionLtLn: LatLng,
+    nameBussines: String = "",
+) {
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(positionLtLn, 15f)
+    }
+    val totalLocation = positionLtLn.let {
+        LatLngBounds.Builder()
+            .include(positionLtLn)
+            .include(it)
+            .build()
+    }
+    val uiSettings by remember {
+        mutableStateOf(
+            MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false
+            )
+        )
+    }
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .clip(
+                RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
+                )
+            )
+            .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
+        elevation = 5.dp
+    ) {
+        GoogleMap(
+            modifier = Modifier
+                .fillMaxSize()
+                .border(1.dp, Color(0xffeaeaea), shape = RoundedCornerShape(16.dp)),
+            cameraPositionState = cameraPositionState,
+            uiSettings = uiSettings,
+            properties = MapProperties(
+                isMyLocationEnabled = true,
+                minZoomPreference = 14.5f,
+                maxZoomPreference = 16.0f,
+                latLngBoundsForCameraTarget = totalLocation
+            )
+        ) {
+            Marker(
+                state = MarkerState(position = positionLtLn),
+                title = nameBussines
+            )
+            MapProperties(isMyLocationEnabled = true, isTrafficEnabled = true)
+        }
+    }
 }

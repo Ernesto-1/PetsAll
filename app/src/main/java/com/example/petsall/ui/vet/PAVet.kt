@@ -68,6 +68,10 @@ fun PAVet(
         }
     }
 
+    LaunchedEffect(state.dataVet){
+        viewModel.onEvent(PAVetEvent.FilterVets(state.selectedSector.value,state.selectedSpecialties.value))
+    }
+
     if (checkLocationPermission(context)) {
         if (state.dataVet.isNotEmpty()) {
 
@@ -113,11 +117,8 @@ fun PAVet(
                                 state.selectedSpecialties.value =
                                     state.selectedSpecialtiesTemp.value
 
-                                state.dataVetFilter = state.dataVet.filter { vetData ->
-                                    val sectoresEspecialidades = (vetData.listSpecializedSector
-                                        ?: emptyList()) + (vetData.listSpecialties ?: emptyList())
-                                    sectoresEspecialidades.any { it in state.selectedSector.value || it in state.selectedSpecialties.value }
-                                }
+                                viewModel.onEvent(PAVetEvent.FilterVets(state.selectedSector.value,state.selectedSpecialties.value))
+
                                 coroutine.launch {
                                     sheetState.hide()
                                 }
@@ -139,12 +140,7 @@ fun PAVet(
                                 sector
                             )
                             state.selectedSector.value = items
-                            state.dataVetFilter = state.dataVet.filter { vetData ->
-                                val sectoresEspecialidades = (vetData.listSpecializedSector
-                                    ?: emptyList()) + (vetData.listSpecialties ?: emptyList())
-                                sectoresEspecialidades.any { it in state.selectedSector.value || it in state.selectedSpecialties.value }
-                            }
-
+                            viewModel.onEvent(PAVetEvent.FilterVets(state.selectedSector.value,state.selectedSpecialties.value))
                         }) {
                         coroutine.launch {
                             if (state.selectedSector.value != state.selectedSectorTemp.value) {
@@ -158,7 +154,7 @@ fun PAVet(
                         }
                     }
                     LazyColumn {
-                        items(if (state.selectedSector.value.isEmpty() && state.selectedSpecialties.value.isEmpty()) state.dataVet else state.dataVetFilter) { item ->
+                        items(state.dataVetFilterNew) { item ->
                             location?.let {
                                 CardVet(data = item, id = item.id, location = it) {
                                     if (!clicked) {

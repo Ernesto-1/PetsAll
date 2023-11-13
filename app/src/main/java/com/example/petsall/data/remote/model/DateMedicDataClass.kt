@@ -11,7 +11,7 @@ data class PetDateMedic(
     val status: String? = "",
     val reason: String? = "",
     val patient: String = "",
-    val idVet: String = "",
+    val idConsult: String = "",
     val lat: Double = 0.0,
     val long: Double = 0.0,
     val nameVet: String = "",
@@ -38,14 +38,14 @@ fun DocumentSnapshot?.petDateMedic(): PetDateMedic? {
     val reason = getString("reason") ?: ""
     val idPatient = getString("idPatient") ?: ""
     val patient = getString("patient") ?: ""
-    val idVet = getString("idVeterinaria") ?: ""
+    val idConsult = getString("idConsultorio") ?: ""
     val dateMedic = getTimestamp("citaSolicitada")
     val lat = getDouble("latitud") ?: 0.0
     val long = getDouble("longitud") ?: 0.0
     val nameVet = getString("nombreVet") ?: ""
     val nameConsult = getString("nombreConsultorio") ?: ""
 
-    return PetDateMedic(status,reason,patient,idVet,lat,long,nameVet,dateMedic,nameConsult,idPatient,referenceId)
+    return PetDateMedic(status,reason,patient,idConsult,lat,long,nameVet,dateMedic,nameConsult,idPatient,referenceId)
 }
 
 

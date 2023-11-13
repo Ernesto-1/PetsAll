@@ -1,12 +1,12 @@
 package com.example.petsall.presentation.vet
 
 import android.location.Location
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.petsall.data.remote.model.VetData
 import com.example.petsall.domain.vet.PAVetUseCase
 import com.example.petsall.utils.Resource
 import com.example.petsall.utils.getList
@@ -41,8 +41,12 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                                         event.location.distanceTo(locationValue)
                                     }
 
-                                    state = state.copy(dataVet = filterCoordinates,listSector = getList(filterCoordinates), listSpecialties = getListSpecialties(filterCoordinates))
-                                }else{
+                                    state = state.copy(
+                                        dataVet = filterCoordinates,
+                                        listSector = getList(filterCoordinates),
+                                        listSpecialties = getListSpecialties(filterCoordinates)
+                                    )
+                                } else {
                                     state = state.copy(dataVet = listOf())
                                 }
                             }
@@ -51,6 +55,22 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
                     }
                 }
             }
+            is PAVetEvent.FilterVets -> {
+                filterPets(event.listSelectPet,event.listSelectSpecialties,state.dataVet)
+            }
         }
+    }
+    private fun filterPets(listSelectPet: List<String>, listSelectSpecialties: List<String>, allVets: List<VetData>) {
+        val filteredVets = if (listSelectPet.isNotEmpty() || listSelectSpecialties.isNotEmpty()) {
+            state.dataVet.filter { vet ->
+                val matchesPet = listSelectPet.isEmpty() || vet.listSpecializedSector?.any { it in listSelectPet } == true
+                val matchesSpecialties = listSelectSpecialties.isEmpty() || vet.listSpecialties?.any { it in listSelectSpecialties } == true
+                matchesPet && matchesSpecialties
+            }
+        } else {
+            allVets
+        }
+
+        state = state.copy(dataVetFilterNew = filteredVets)
     }
 }

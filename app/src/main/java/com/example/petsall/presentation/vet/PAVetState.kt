@@ -11,6 +11,7 @@ data class PAVetState(
     var success: Boolean = false,
     var dataVet: List<VetData> = listOf(),
     var dataVetFilter: List<VetData> = listOf(),
+    var dataVetFilterNew: List<VetData> = listOf(),
     var listSector: List<String> = listOf(),
     var listSpecialties: List<String> = listOf(),
     var dis: Int = 100,
