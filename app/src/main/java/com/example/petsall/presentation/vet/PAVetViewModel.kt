@@ -70,7 +70,6 @@ class PAVetViewModel @Inject constructor(private val useCase: PAVetUseCase) : Vi
         } else {
             allVets
         }
-
         state = state.copy(dataVetFilterNew = filteredVets)
     }
 }

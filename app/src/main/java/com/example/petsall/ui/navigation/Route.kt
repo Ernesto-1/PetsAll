@@ -3,7 +3,9 @@ package com.example.petsall.ui.navigation
 object Route {
     const val PAHome = "PAHome"
     const val PASignUp = "PASignUp"
+    const val PrevSignUp = "PrevSignUp"
     const val PALogin = "PALogin"
+    const val PAForgotten = "PAForgotten"
     const val PAVet = "PAVet"
     const val PANewPet = "PANewPet"
     const val PAPerfil = "PAPerfil"

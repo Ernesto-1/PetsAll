@@ -10,6 +10,8 @@ import com.example.petsall.domain.emergency.PAEmergencyRepo
 import com.example.petsall.domain.emergency.PAEmergencyRepoImpl
 import com.example.petsall.domain.files.PAFilesRepo
 import com.example.petsall.domain.files.PAFilesRepoImpl
+import com.example.petsall.domain.forgotten.PAForgottenPasswordRepo
+import com.example.petsall.domain.forgotten.PAForgottenPasswordRepoImpl
 import com.example.petsall.domain.home.PAHomeRepo
 import com.example.petsall.domain.home.PAHomeRepoImpl
 import com.example.petsall.domain.loggin.PALogginRepo
@@ -67,6 +69,8 @@ abstract class AppModule {
     abstract fun providesBusinessRepository(repoBusiness:PABusinessRepoImpl): PABusinessRepo
     @Binds
     abstract fun providesFilesRepository(repoFiles:PAFilesRepoImpl): PAFilesRepo
+    @Binds
+    abstract fun providesForgottenRepository(repoForgotten:PAForgottenPasswordRepoImpl): PAForgottenPasswordRepo
 
     companion object {
 

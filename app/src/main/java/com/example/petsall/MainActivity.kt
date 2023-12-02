@@ -33,6 +33,7 @@ import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
 import com.example.petsall.ui.explore.PAExplore
 import com.example.petsall.ui.files.PAFiles
+import com.example.petsall.ui.forgotten.PAForgottenPassword
 import com.example.petsall.ui.home.PAHome
 import com.example.petsall.ui.login.PALogin
 import com.example.petsall.ui.navigation.Menu
@@ -40,6 +41,7 @@ import com.example.petsall.ui.navigation.Route
 import com.example.petsall.ui.newPet.PANewPet
 import com.example.petsall.ui.perfil.PAProfile
 import com.example.petsall.ui.signup.PASignUp
+import com.example.petsall.ui.signup.PrevSignUp
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.theme.stItems
 import com.example.petsall.ui.vaccination.PAVaccination
@@ -68,7 +70,6 @@ class MainActivity() : ComponentActivity() {
                     false
                 }
             }
-
         setContent {
             PetsAllTheme {
                 val navigationController = rememberNavController()
@@ -152,6 +153,7 @@ class MainActivity() : ComponentActivity() {
                             Modifier.padding(innerPadding)
                         ) {
                             composable(Route.PALogin) { PALogin(navController = navigationController) }
+                            composable(Route.PAForgotten) { PAForgottenPassword() }
                             composable(Route.PAHome) {
                                 PAHome(
                                     navController = navigationController,
@@ -160,6 +162,7 @@ class MainActivity() : ComponentActivity() {
                                 )
                             }
                             composable(Route.PASignUp) { PASignUp(navController = navigationController) }
+                            composable(Route.PrevSignUp) { PrevSignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
                             composable(Route.PAEmergency) { PAEmergency() }
                             composable(

@@ -84,8 +84,7 @@ fun PALogin(navController: NavController, viewModel: PALoginViewModel = hiltView
                 OutlinedTextField(
                     value = email,
                     onValueChange = { newEmail ->
-
-                        if (newEmail.isEmpty() || newEmail.all { it.isLetterOrDigit() || it == '.' || it == '-' || it == '@' || it == '_' }) {
+                        if (newEmail.isEmpty() || newEmail.all { it.isLetterOrDigit() || it == '.' || it == '-' || it == '@' || it == '_'|| it == '&' || it == '$'|| it == '#'} ) {
                             email = newEmail
                             errorEmail = false
                             state.message = ""
@@ -193,7 +192,9 @@ fun PALogin(navController: NavController, viewModel: PALoginViewModel = hiltView
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Light,
                         modifier = Modifier
-                            .clickable {}
+                            .clickable {
+                                navController.navigate(Route.PAForgotten)
+                            }
                             .padding(top = 5.dp))
 
                     Box(
@@ -206,7 +207,7 @@ fun PALogin(navController: NavController, viewModel: PALoginViewModel = hiltView
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier
-                                .clickable { navController.navigate(Route.PASignUp) }
+                                .clickable { navController.navigate(Route.PrevSignUp) }
                                 .padding(bottom = 16.dp)
                         )
                     }

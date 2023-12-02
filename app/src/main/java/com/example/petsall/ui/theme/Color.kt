@@ -17,6 +17,7 @@ val BtnBlue = Color(0xFF92C9D1)
 val GreenLight = Color(0xFFA8BB5A)
 val plata = Color(0xFFE3e4e5)
 val statusEarring = Color(0xFFD4D4D4) // Completamente opaco
+val txtGrey = Color(0xFFB8B8B8)
 val statusDefeated = Color(0xFFFFDADA) // Completamente opaco
 val statusCurrent = Color(0xFFCFECC8)
 val backgroundAll = Color(0xFFF8F8F8)

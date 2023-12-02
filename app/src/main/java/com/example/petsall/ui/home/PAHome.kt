@@ -2,11 +2,9 @@ package com.example.petsall.ui.home
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeOut
@@ -151,7 +149,7 @@ fun PAHome(
                                         .clip(CircleShape),
                                     contentScale = ContentScale.Crop,
                                     placeholder = painterResource(
-                                        id = R.drawable.circle_24_image
+                                        id = R.drawable.ic_ap_circle
                                     )
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
