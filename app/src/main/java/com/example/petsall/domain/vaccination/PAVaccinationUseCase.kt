@@ -1,6 +1,7 @@
 package com.example.petsall.domain.vaccination
 
 import android.util.Log
+import com.example.petsall.data.remote.model.MedicalRecordData
 import com.example.petsall.data.remote.model.VaccineDataClass
 import com.example.petsall.data.remote.model.mapToListVaccineDataClass
 import com.example.petsall.data.remote.model.mapTouserDataClass

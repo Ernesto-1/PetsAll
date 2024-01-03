@@ -3,6 +3,9 @@ package com.example.petsall.utils
 object AppConstans {
     // Constantes API
     const val BASE_URL = "https://maps.googleapis.com/maps/api/"
+
+    const val TYPE_MEDICINE = "medicamento"
+
     object SpeciesConstants {
         const val DOG = "dog"
         const val FISH = "fish"

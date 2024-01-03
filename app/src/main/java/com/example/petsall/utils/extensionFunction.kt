@@ -2,15 +2,19 @@ package com.example.petsall.utils
 
 import android.Manifest
 import android.app.DatePickerDialog
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.DatePicker
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.focus.FocusManager
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import com.example.petsall.data.remote.model.BusinessData
 import com.example.petsall.data.remote.model.VetData
 import com.google.firebase.Timestamp
 import com.google.gson.Gson
@@ -160,6 +164,15 @@ fun getList(list: List<VetData>? = listOf()): List<String> {
     return allSectors.distinct()
 }
 
+fun getListBussiness(list: List<BusinessData>? = listOf()): List<String> {
+    val allSectors : MutableList<String> = mutableListOf()
+    allSectors.addAll(listOf("parques", "alimento"))
+    list?.map { coupon ->
+        coupon.category?.map { it1 -> allSectors.add(it1 as String) }
+    }
+    return allSectors.distinct()
+}
+
 fun getListSpecialties(list: List<VetData>? = listOf()): List<String> {
     val allSpecialties: MutableList<String> = mutableListOf()
     list?.map { coupon ->
@@ -220,3 +233,12 @@ fun calculateAge(timestamp: Timestamp): String {
     return formattedAge
 }
 
+fun loadImageFromUri(uri: Uri, contentResolver: ContentResolver): Bitmap? {
+    return try {
+        val inputStream = contentResolver.openInputStream(uri)
+        BitmapFactory.decodeStream(inputStream)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}

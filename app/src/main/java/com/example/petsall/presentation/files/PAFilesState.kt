@@ -10,6 +10,6 @@ data class PAFilesState(
     var message: String = "",
     var success: Boolean = false,
     var data: List<FilesDataClass?> = listOf(),
-    val dataFileSelected: MutableState<FilesDataClass> = mutableStateOf(FilesDataClass())
+    val dataFileSelected: MutableState<FilesDataClass> = mutableStateOf(FilesDataClass()),
 
 )

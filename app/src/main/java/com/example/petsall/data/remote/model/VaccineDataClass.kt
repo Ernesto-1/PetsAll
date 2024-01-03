@@ -23,11 +23,11 @@ fun DocumentSnapshot?.mapToVaccineDataClass(): VaccineDataClass? {
     val pLicense = getString("CedulaP") ?: ""
     val type = getString("Tipo") ?: ""
     val vaccine = getString("Vacuna") ?: ""
-    val status = getString("Estatus") ?: ""
+    val status = getString("Status") ?: ""
     val vaccineExpiration = getTimestamp("Caducidad_vacuna")
     val dateVaccine = getTimestamp("Fecha_vacunacion")
 
-    return VaccineDataClass(pLicense = pLicense, status = status,type = type, vaccine = vaccine,dateVaccine = dateVaccine, vaccineExpiration = vaccineExpiration)
+    return VaccineDataClass(pLicense = pLicense, status = status.lowercase(),type = type, vaccine = vaccine,dateVaccine = dateVaccine, vaccineExpiration = vaccineExpiration)
 }
 
 fun List<DocumentSnapshot?>.mapToListVaccineDataClass(): ListVaccineDataClass {
@@ -36,5 +36,3 @@ fun List<DocumentSnapshot?>.mapToListVaccineDataClass(): ListVaccineDataClass {
     }
     return ListVaccineDataClass(vaccineDataList.toMutableList())
 }
-
-

@@ -63,10 +63,10 @@ fun CardDateOfPet(
                     AsyncImage(
                         model = if (data.img?.isNotEmpty() == true) data.img else when (data.pet) {
                             AppConstans.SpeciesConstants.FISH -> R.drawable.fish
-                            AppConstans.SpeciesConstants.DOG -> R.drawable.dog_face
+                            AppConstans.SpeciesConstants.DOG -> R.drawable.icon_dog
                             AppConstans.SpeciesConstants.CAT -> R.drawable.cat_face
                             AppConstans.SpeciesConstants.BIRD -> R.drawable.bird
-                            else -> R.drawable.dog_face
+                            else -> R.drawable.icon_dog
                         },
                         contentDescription = "imageFromUrl",
                         modifier = Modifier

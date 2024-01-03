@@ -11,7 +11,7 @@ object Route {
     const val PAPerfil = "PAPerfil"
     const val PAEmergency = "PAEmergency"
     const val PABusinessList = "PABusinessList"
-    const val PAExplore = "PAExplore"
+    const val PABussinessDetail = "PABussinessDetail"
     const val PAVaccinationCard = "PAVaccinationCard"
     const val PAFiles = "PAFiles"
     const val PAChangePet = "PAChangePet"

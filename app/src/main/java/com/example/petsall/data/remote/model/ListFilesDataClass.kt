@@ -8,36 +8,63 @@ data class ListFilesDataClass(
 )
 
 data class FilesDataClass(
-    val pLicense: String = "",
-    val reason: String = "",
+    val id: String = "",
+    val medicalMatter: String = "",
+    val license: String = "",
     val comments: String = "",
     val diagnosis: String = "",
-    val treatment: String = "",
     val date: Timestamp? = null,
-    val medicine : ArrayList<*>? = null,
-    val vaccines : ArrayList<*>? = null
+    val treatment: List<*>? = null,
+    val medicalRecordList: List<Medicamento> = arrayListOf()
 )
 
-fun DocumentSnapshot?.mapToFileData(): FilesDataClass? {
-    if (this == null || !exists()) {
-        return null
+fun List<DocumentSnapshot?>.toDataMedicalReport(): MedicalRecordData {
+    val data = mapNotNull { documentSnapshot ->
+        documentSnapshot.mapToMedicalRecordData()
     }
-    val pLicense = getString("CedulaP") ?: ""
-    val reason = getString("Asunto") ?: ""
+    return MedicalRecordData(
+        record = data
+    )
+}
+
+fun DocumentSnapshot?.mapToMedicalRecordData(): FilesDataClass {
+    if (this == null || !exists()) {
+        return FilesDataClass()
+    }
+
+    val idRecord = this.reference.id
+    val medicalMatter = getString("Asunto") ?: ""
+    val licence = getString("CedulaP") ?: ""
     val comments = getString("Comentarios") ?: ""
     val diagnosis = getString("Diagnostico") ?: ""
-    val treatment = getString("Tratamiento") ?: ""
     val date = getTimestamp("Fecha")
-    val medicine: ArrayList<*>? = get("Medicamentos") as? ArrayList<*>
-    val vaccines: ArrayList<*>? = get("Vacunas") as? ArrayList<*>
+    val treatment: ArrayList<*>? = get("Tratamiento") as? ArrayList<*>
+    val vaccines: ArrayList<*>? = get("Cartilla") as? ArrayList<*>
+    val medicalRecordList: ArrayList<Medicamento> = arrayListOf()
 
-    return FilesDataClass(pLicense = pLicense, reason = reason, comments = comments,diagnosis = diagnosis,treatment = treatment, date = date,medicine = medicine,vaccines = vaccines)
-}
-
-
-fun List<DocumentSnapshot?>.mapToListFilesDataClass(): ListFilesDataClass {
-    val filesDataList = mapNotNull { documentSnapshot ->
-        documentSnapshot.mapToFileData()
+    vaccines?.forEach { vacc ->
+        val hash = vacc as HashMap<*, *>
+        medicalRecordList.add(
+            Medicamento(
+                nombre = hash["treatment"].toString(),
+                numero_medicamento = hash["code"].toString(),
+                tipo = hash["type"].toString(),
+                nextAplication = hash["nextAplication"].toString()
+            )
+        )
     }
-    return ListFilesDataClass(filesDataList.toMutableList())
+
+    return FilesDataClass(
+        idRecord, medicalMatter, licence, comments, diagnosis, date, treatment, medicalRecordList
+    )
 }
+data class MedicalRecordData(
+    val record: List<FilesDataClass> = listOf()
+)
+data class Medicamento(
+    val nombre: String = "",
+    val numero_medicamento: String = "",
+    val tipo: String = "",
+    val nextAplication: String = ""
+)
+

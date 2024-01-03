@@ -1,6 +1,7 @@
 package com.example.petsall.data.remote.newpets
 
 import android.graphics.Bitmap
+import com.example.petsall.ui.newPet.RegisterPets
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,11 +17,7 @@ class PANewPetsDataSource @Inject constructor(
 ) {
 
     suspend fun newPetRegister(
-        name: String,
-        breed: String,
-        birthday: Timestamp?,
-        pets: String,
-        img: Bitmap?
+        dataNew: RegisterPets
     ): Boolean {
         try {
             val setPetRef = firebaseFirestore.collection("Users")
@@ -28,18 +25,19 @@ class PANewPetsDataSource @Inject constructor(
                 .collection("Mascotas").document()
 
             val updates = hashMapOf<String, Any>(
-                "Mascota" to pets,
-                "Nombre" to name,
-                "Raza" to breed,
+                "Mascota" to dataNew.pets,
+                "Nombre" to dataNew.name,
+                "Raza" to dataNew.breeds,
+                "Genero" to dataNew.gender,
                 "ImgUrl" to ""
             )
-            if (birthday != null) {
-                updates["Fecha_Nacimiento"] = birthday
+            if (dataNew.birthday != null) {
+                updates["Fecha_Nacimiento"] = dataNew.birthday
             }
 
-            if (img != null) {
+            if (dataNew.img != null) {
                 val baos = ByteArrayOutputStream()
-                img.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                dataNew.img.compress(Bitmap.CompressFormat.JPEG, 100, baos)
                 val data = baos.toByteArray()
 
                 val storageRef = storage.reference.child("images/${firebaseAuth.uid.toString()}/pets/${setPetRef.id}/${setPetRef.id}")

@@ -1,21 +1,23 @@
 package com.example.petsall.data.remote.model
 
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.GeoPoint
 
 data class ListBusinessDataClass(
     val listBusiness: MutableList<BusinessData> = mutableListOf()
 )
 
 data class BusinessData(
-    val accessories: Boolean = false,
-    val food: Boolean = false,
     val articles : ArrayList<*>? = null,
     val latitude: Double = 19.305152,
     val length: Double = -99.186587,
     val name: String? = "",
-    val desserts: Boolean = false,
     val status: String? = "",
-    val imgBanner: String? = ""
+    val imgBanner: String? = "",
+    val hStart: String? = "",
+    val hEnd: String? = "",
+    val locationGeoPoint: GeoPoint? = null,
+    val category:ArrayList<*>? = null,
 )
 
 fun List<DocumentSnapshot?>.mapToListBusinessDataClass(): ListBusinessDataClass {
@@ -30,15 +32,16 @@ fun DocumentSnapshot?.businessData(): BusinessData? {
         return null
     }
 
-    val accessories = getBoolean("accesorios") ?: false
-    val food = getBoolean("alimento") ?: false
     val articles = get("articulos") as? ArrayList<*>
     val latitude = getDouble("latitud") ?: 19.305152
     val length = getDouble("longitud") ?: -99.186587
     val name = getString("nombre") ?: ""
-    val desserts =  getBoolean("postres") ?: false
     val status = getString("status") ?: ""
     val imgBanner = getString("imgBanner") ?: ""
+    val hStart = getString("hora_Inicio") ?: ""
+    val hEnd = getString("hora_Fin") ?: ""
+    val locationGeoPoint = getGeoPoint("ubicacion")
+    val category = get("categoria") as? ArrayList<*>
 
-    return BusinessData(accessories, food, articles, latitude, length, name,desserts,status,imgBanner)
+    return BusinessData(articles, latitude, length, name,status,imgBanner,hStart, hEnd,locationGeoPoint,category)
 }

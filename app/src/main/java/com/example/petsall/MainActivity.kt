@@ -27,11 +27,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.petsall.data.remote.model.BusinessData
 import com.example.petsall.data.remote.model.VetData
-import com.example.petsall.ui.business.PABusinessList
+import com.example.petsall.ui.bussiness.business.PABusinessList
 import com.example.petsall.ui.changepet.PAChangePet
 import com.example.petsall.ui.emergency.PAEmergency
-import com.example.petsall.ui.explore.PAExplore
+import com.example.petsall.ui.bussiness.bussinessdetail.PABussinessDetail
 import com.example.petsall.ui.files.PAFiles
 import com.example.petsall.ui.forgotten.PAForgottenPassword
 import com.example.petsall.ui.home.PAHome
@@ -45,8 +46,8 @@ import com.example.petsall.ui.signup.PrevSignUp
 import com.example.petsall.ui.theme.PetsAllTheme
 import com.example.petsall.ui.theme.stItems
 import com.example.petsall.ui.vaccination.PAVaccination
-import com.example.petsall.ui.vet.PAVet
-import com.example.petsall.ui.vetdetail.PAVetDetail
+import com.example.petsall.ui.consultingroom.vet.PAVet
+import com.example.petsall.ui.consultingroom.vetdetail.PAVetDetail
 import com.example.petsall.utils.getObjectFromJson
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -81,7 +82,7 @@ class MainActivity() : ComponentActivity() {
                     Menu(Route.PAVet, Icons.Filled.Favorite, "Veterinario"),
                     Menu(Route.PAEmergency, Icons.Filled.Warning, "Emergencia"),
                     Menu(
-                        Route.PAExplore,
+                        Route.PABusinessList,
                         ImageVector.vectorResource(id = R.drawable.explore),
                         "Explora"
                     ),
@@ -99,7 +100,7 @@ class MainActivity() : ComponentActivity() {
                                 Route.PAEmergency,
                                 Route.PAVet,
                                 Route.PAPerfil,
-                                Route.PAExplore
+                                Route.PABusinessList
                             )
                         ) {
                             if (currentDestination?.route == Route.PAHome) {
@@ -165,19 +166,14 @@ class MainActivity() : ComponentActivity() {
                             composable(Route.PrevSignUp) { PrevSignUp(navController = navigationController) }
                             composable(Route.PAVet) { PAVet(navController = navigationController) }
                             composable(Route.PAEmergency) { PAEmergency() }
-                            composable(
-                                "${Route.PABusinessList}/{nameList}",
-                                arguments = listOf(navArgument("nameList") {
-                                    type = NavType.StringType
-                                })
-                            ) { backStackEntry ->
-                                PABusinessList(
-                                    nameListBusiness = backStackEntry.arguments?.getString(
-                                        "nameList"
-                                    ) ?: "", navController = navigationController
-                                )
+                            composable(Route.PABusinessList) { PABusinessList(navController = navigationController) }
+                            composable("${Route.PABussinessDetail}/{dataBussiness}", arguments = listOf(navArgument("dataBussiness") {
+                                type = NavType.StringType
+                            })) { backStackEntry ->
+                                getObjectFromJson<BusinessData>(backStackEntry.arguments?.getString("dataBussiness"))?.let {
+                                    PABussinessDetail(dataBussiness = it,navController = navigationController)
+                                }
                             }
-                            composable(Route.PAExplore) { PAExplore(navController = navigationController) }
                             composable(
                                 "${Route.PAVaccinationCard}/{idUser}/{idPet}",
                                 arguments = listOf(navArgument("idUser") {

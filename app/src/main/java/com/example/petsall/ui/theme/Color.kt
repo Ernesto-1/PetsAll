@@ -21,6 +21,8 @@ val txtGrey = Color(0xFFB8B8B8)
 val statusDefeated = Color(0xFFFFDADA) // Completamente opaco
 val statusCurrent = Color(0xFFCFECC8)
 val backgroundAll = Color(0xFFF8F8F8)
+val avGrayShadow = Color(0x40000000)
+val avGrayBorder = Color(0x1A000000)
 
 val PAError = Color(0xFFFF5A5A)
 val PASucces = Color(0xFFA8BB5A)

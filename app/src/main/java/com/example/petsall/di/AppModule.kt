@@ -22,10 +22,10 @@ import com.example.petsall.domain.signup.PASignUpRepo
 import com.example.petsall.domain.signup.PASignUpRepoImpl
 import com.example.petsall.domain.vaccination.PAVaccinationRepo
 import com.example.petsall.domain.vaccination.PAVaccinationRepoImpl
-import com.example.petsall.domain.vet.PAVetRepo
-import com.example.petsall.domain.vet.PAVetRepoImpl
-import com.example.petsall.domain.vetdetail.PAVetDetailRepo
-import com.example.petsall.domain.vetdetail.PAVetDetailRepoImpl
+import com.example.petsall.domain.consultingroom.vet.PAVetRepo
+import com.example.petsall.domain.consultingroom.vet.PAVetRepoImpl
+import com.example.petsall.domain.consultingroom.vetdetail.PAVetDetailRepo
+import com.example.petsall.domain.consultingroom.vetdetail.PAVetDetailRepoImpl
 import com.example.petsall.utils.AppConstans
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot

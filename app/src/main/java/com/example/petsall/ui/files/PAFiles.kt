@@ -1,41 +1,33 @@
 package com.example.petsall.ui.files
 
-import android.util.Log
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.example.petsall.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.petsall.data.remote.model.FilesDataClass
 import com.example.petsall.presentation.files.PAFilesEvent
 import com.example.petsall.presentation.files.PAFilesViewModel
-import com.example.petsall.ui.components.ChipCard
-import com.example.petsall.ui.components.GSPRMFlexLayout
 import com.example.petsall.ui.components.bottom.HeaderBottomSheet
-import com.example.petsall.ui.components.listSpecialized
+import com.example.petsall.ui.components.cards.RecordList
 import com.example.petsall.ui.theme.*
 import com.example.petsall.utils.convertTimestampToString
 import com.google.firebase.Timestamp
@@ -47,8 +39,9 @@ fun PAFiles(
     idPet: String = "", navController: NavController, viewModel: PAFilesViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-    val coroutine = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    var selectedItem by rememberSaveable { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.onEvent(PAFilesEvent.GetFiles(idPet = idPet))
@@ -95,7 +88,7 @@ fun PAFiles(
 
                         HeaderBottomSheet()
                         Text(
-                            text = state.dataFileSelected.value.reason,
+                            text = state.dataFileSelected.value.medicalMatter,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = Purple200, modifier = Modifier.padding(vertical = 4.dp)
@@ -117,7 +110,7 @@ fun PAFiles(
                                 )
                             }
                             Text(
-                                text = "Ced. Prof." + state.dataFileSelected.value.pLicense,
+                                text = "Ced. Prof." + state.dataFileSelected.value.license,
                                 modifier = Modifier.padding(top = 4.dp),
                                 textAlign = TextAlign.Start,
                                 maxLines = 1,
@@ -170,22 +163,23 @@ fun PAFiles(
                             fontWeight = FontWeight.Medium,
                             color = Purple200, modifier = Modifier.padding(vertical = 16.dp)
                         )
-                        OutlinedTextField(
-                            value = state.dataFileSelected.value.treatment,
-                            onValueChange = { comm ->
+                        state.dataFileSelected.value.treatment?.forEach {
+                            OutlinedTextField(
+                                value = it.toString(),
+                                onValueChange = { comm ->
 
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                                .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            textStyle = MaterialTheme.typography.body1,
-                            readOnly = true, enabled = false
-                        )
-                        listSpecialized(state.dataFileSelected.value.vaccines as List<*>?, title = "Vacunas")
-                        listSpecialized(state.dataFileSelected.value.medicine as List<*>?, title = "Medicamentos")
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .padding(vertical = 4.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                textStyle = MaterialTheme.typography.body1,
+                                readOnly = true, enabled = false
+                            )
+                        }
 
+                        RecordList(data = state.dataFileSelected.value.medicalRecordList)
 
                     }
 
@@ -198,14 +192,19 @@ fun PAFiles(
                         .padding(top = 10.dp)
                 ) {
                     items(state.data) {
-                        CardFiles(data = it) {
-                            if (it != null) {
-                                coroutine.launch {
-                                    state.dataFileSelected.value = it
-                                    sheetState.show()
+                        VetCard(
+                            VetCardInfo(
+                                date = convertTimestampToString(it?.date as Timestamp),
+                                reason = it.medicalMatter,
+                                vetLicense = "Ced.Prof. ${it.license}"
+                            ),
+                            isSelected = selectedItem == it.id
+                        ) {
+                            selectedItem = it.id
+                            state.dataFileSelected.value = it
 
-                                }
-
+                            scope.launch {
+                                sheetState.show()
                             }
                         }
                     }
@@ -217,62 +216,74 @@ fun PAFiles(
 
 @Preview(showBackground = true)
 @Composable
-fun CardFiles(
-    modifier: Modifier = Modifier,
-    data: FilesDataClass? = FilesDataClass(),
+fun VetCard(
+    vetInfo: VetCardInfo = VetCardInfo(
+        date = "2023-11-09",
+        reason = "Consulta",
+        vetLicense = "Ced.Prof.: 12345"
+    ),
+    isSelected: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-
-    val date = convertTimestampToString(data?.date as Timestamp)
     Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .height(100.dp)
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = {
-                onClick.invoke()
-            }),
-        shape = RoundedCornerShape(8.dp),
-        elevation = 4.dp
-    ) {
+            .padding(vertical = 4.dp, horizontal = 16.dp)
+            .clickable(onClick = onClick),
+        elevation = 8.dp,
+        border = BorderStroke(
+            if (isSelected) 2.dp else 1.dp,
+            if (isSelected) BtnBlue else Color.White
+        )
 
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .fillMaxWidth()
+                .padding(12.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 8.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = data.reason,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    maxLines = 2,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = Purple200
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calendar),
+                        contentDescription = null,
+                        tint = Color.Gray
+                    )
+                    Text(text = vetInfo.date, fontWeight = FontWeight.Bold)
+                }
+
+                Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(text = vetInfo.reason, fontWeight = FontWeight.Bold)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_medical),
+                    contentDescription = null,
+                    tint = Color.Gray
                 )
-                Text(
-                    text = ("Fecha: $date"),
-                    modifier = Modifier.padding(top = 4.dp),
-                    textAlign = TextAlign.Start,
-                    maxLines = 1,
-                    fontSize = 12.sp,
-                    style = TextStyle.Default
-                )
-                Text(
-                    text = "Ced. Prof." + data.pLicense,
-                    modifier = Modifier.padding(top = 4.dp),
-                    textAlign = TextAlign.Start,
-                    maxLines = 1,
-                    fontSize = 12.sp,
-                    style = TextStyle.Default
-                )
+                Text(text = vetInfo.vetLicense, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
+
+data class VetCardInfo(
+    val date: String,
+    val reason: String,
+    val vetLicense: String
+)

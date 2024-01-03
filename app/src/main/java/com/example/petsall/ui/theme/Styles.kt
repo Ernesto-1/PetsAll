@@ -53,3 +53,10 @@ val stItems = TextStyle(
     fontWeight = FontWeight.Bold,
     textAlign = TextAlign.Center,
 )
+
+val stText = TextStyle(
+    color = Color.Black,
+    fontSize = 14.sp,
+    fontWeight = FontWeight.Normal,
+    textAlign = TextAlign.Center,
+)

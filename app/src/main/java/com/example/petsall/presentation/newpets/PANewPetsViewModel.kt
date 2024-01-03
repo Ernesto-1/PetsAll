@@ -22,7 +22,7 @@ class PANewPetsViewModel @Inject constructor(private val useCase: PANewPetsUseCa
         when (event) {
             is PANewPetsEven.Register -> {
                 viewModelScope.launch {
-                    useCase.registerPet(name = event.name, breed = event.breeds, birthday = event.birthday, pet = event.pets, img = event.img).collect() { result ->
+                    useCase.registerPet(dataRegister = event.dataNew).collect() { result ->
                         when (result) {
                             is Resource.Loading -> {
                                 state = state.copy(loading = true)
